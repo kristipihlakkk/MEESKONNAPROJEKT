@@ -1,0 +1,37 @@
+<Solution>
+  <Folder Name="/Code/">
+    <Project Path="Code/Aids/Aids.csproj" />
+    <Project Path="Code/Data/Data.csproj" />
+    <Project Path="Code/Infra/Infra.csproj" />
+    <Project Path="Code/Logic/Logic.csproj" />
+    <Project Path="Code/Razor/Razor.csproj" />
+    <Project Path="Code/Shared/Shared.csproj" Id="c1e97a68-d97d-4e34-a041-332e72f733ee" />
+    <Project Path="Domain/Domain.csproj" Id="c098c256-0908-4fff-a6c5-6f6a8f2ff1af" />
+    <Project Path="Jobs/Jobs.csproj" Id="0838ec9b-e90f-41a6-8072-2fc4f10704ed" />
+  </Folder>
+  <Folder Name="/Soft/" />
+  <Folder Name="/Soft/App/" />
+  <Folder Name="/Soft/Blazor/">
+    <Project Path="Soft/Blazor/Client/Blazor.Client.csproj" />
+    <Project Path="Soft/Blazor/Server/Blazor.csproj" />
+  </Folder>
+  <Folder Name="/Soft/Maui/" />
+  <Folder Name="/Soft/Movie/">
+    <Project Path="Soft/Movie/Client/Movie.Client.csproj" />
+    <Project Path="Soft/Movie/Server/Movie.csproj" />
+  </Folder>
+  <Folder Name="/Soft/Todo/">
+    <Project Path="Soft/Todo/Client/Todo.Client.csproj" />
+    <Project Path="Soft/Todo/Server/Todo.csproj" />
+  </Folder>
+  <Folder Name="/Soft/Web/">
+    <Project Path="Soft/Web/Client/Web.Client.csproj" />
+    <Project Path="Soft/Web/Server/Web.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Aids/Tests.Aids.csproj" />
+    <Project Path="Tests/Data/Tests.Data.csproj" />
+    <Project Path="Tests/Infra/Tests.Infra.csproj" />
+    <Project Path="Tests/Logic/Tests.Logic.csproj" />
+  </Folder>
+</Solution>
