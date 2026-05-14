@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Gym.Data;
 
-    internal class Trainer
+    public class Trainer : Party
     {
+        public string Specialisation { get; set; } = default!;
+    
+        public string? Bio { get; set; }
     }
 

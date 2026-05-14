@@ -4,7 +4,12 @@ using System.Text;
 
 namespace Gym.Data;
 
-    internal class Visit
+    public class Visit
     {
+        public Guid Id { get; set; }
+
+        public DateTime VisitDate { get; set; }
+
+        public string? Notes { get; set; }
     }
 
