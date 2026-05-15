@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Gym.Data;
+namespace Abc.Data;
 
-    public class Visit
-    {
+    public class Visit : BaseEntity
+{
         public Guid Id { get; set; }
 
         public DateTime VisitDate { get; set; }

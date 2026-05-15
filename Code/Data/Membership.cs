@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Gym.Data;
-public class Membership
-    {
+namespace Abc.Data;
+public class Membership : BaseEntity
+{
          public Guid Id { get; set; }
 
         public string MembershipType { get; set; } = default!;

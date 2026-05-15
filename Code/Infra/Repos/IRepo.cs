@@ -1,19 +1,24 @@
-﻿using System;
+﻿using Abc.Data;
+using Common;
+using Gym.Data;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Common;
 
-namespace Gym.Infra;
-
-public interface IRepo<T> where T : BaseEntity
+namespace Gym.Infra
+{
+    public interface IRepo<T> where T : BaseEntity
     {
-    Task<T> GetAsync(Guid id);
-
-    Task<IEnumerable<T>> GetAsync();
-
-    Task<T> CreateAsync(T entity);
-
-    Task<T> UpdateAsync(T entity);
-
-    Task DeleteAsync(Guid id);
+        Task<T?> GetAsync(Guid id);
+        Task<int> CountAsync(Query q);
+        Task<IEnumerable<T>> GetAsync(Query q);
+        Task<T> CreateAsync(T e);
+        Task<T> UpdateAsync(T e);
+        Task DeleteAsync(Guid id);
+    }
+    public interface IPersonsRepo : IRepo<Person> { }
+    public interface IGymMembersRepo : IRepo<GymMember> { }
+    public interface ITrainersRepo : IRepo<Trainer> { }
+    public interface IMembershipsRepo : IRepo<Membership> { }
+    public interface IVisitsRepo : IRepo<Visit> { }
 }

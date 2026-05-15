@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Gym.Data;
+using Common;
+using Abc.Data;
 
 namespace Gym.Data;
 
-public class GymMember : Party
+public class GymMember : PartyRole
 {
     public Membership? Membership { get; set; }
 

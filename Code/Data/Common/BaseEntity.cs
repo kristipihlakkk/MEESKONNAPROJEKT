@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Common
 {
-    internal class BaseEntity
+    public abstract class BaseEntity
     {
+        public virtual Guid Id { get; set; }
     }
 }
