@@ -1,6 +1,10 @@
 <Solution>
-  <Project Path="../Gym.Data/Gym.Data.csproj" />
-  <Project Path="../Gym.Infra/Gym.Infra.csproj" />
+  <Project Path="Code/Aids/Aids.csproj" />
+  <Project Path="Code/Data/Data.csproj" />
+  <Project Path="Code/Infra/Infra.csproj" />
+  <Project Path="Code/Logic/Logic.csproj" />
+  <Project Path="Code/Razor/Razor.csproj" />
+  <Project Path="Code/Shared/Shared.csproj" />
   <Project Path="GymSystem.Client/GymSystem.Client.csproj" />
   <Project Path="GymSystem/GymSystem.csproj" />
 </Solution>

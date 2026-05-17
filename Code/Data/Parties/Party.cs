@@ -11,6 +11,7 @@ public abstract class Party : BaseEntity
 {
     public string? Notes { get; set; }
     public ICollection<Address> Addresses { get; set; } = [];
-    public ICollection<ContactMethod> ContactMethods { get; set; } = [];
+    //Seda klassi ei olnud, kommenteerisin hetkeks välja, et build läbi läheks
+    //public ICollection<ContactMethod> ContactMethods { get; set; } = [];
     public ICollection<PartyRole> Roles { get; set; } = [];
 }

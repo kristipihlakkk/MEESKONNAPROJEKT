@@ -24,5 +24,13 @@ namespace Gym.Infra
         public DbSet<Membership> Memberships { get; set; }
 
         public DbSet<Visit> Visits { get; set; }
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<LocationRooms> LocationRooms { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
+        public DbSet<Address> Addresses { get; set; }
+        public DbSet<Holiday> Holidays { get; set; }
+        public DbSet<OpenCloseTimes> OpenCloseTimes { get; set; }
+
     }
 }

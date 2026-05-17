@@ -21,4 +21,10 @@ namespace Gym.Infra
     public interface ITrainersRepo : IRepo<Trainer> { }
     public interface IMembershipsRepo : IRepo<Membership> { }
     public interface IVisitsRepo : IRepo<Visit> { }
+    public interface ILocationsRepo : IRepo<Location> { }
+    public interface IRoomsRepo : IRepo<Room> { }
+    public interface ILocationRoomsRepo : IRepo<LocationRooms> { }
+    public interface IBookingsRepo : IRepo<Booking> { }
+    public interface IRoomBookingsRepo : IRepo<RoomBookings> { }
+
 }

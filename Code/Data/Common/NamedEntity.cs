@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace Common;
 
-namespace Common
+public abstract class NamedEntity : BaseEntity
 {
-    internal class NamedEntity
-    {
-    }
+    public virtual string Name { get; set; } = "";
 }
