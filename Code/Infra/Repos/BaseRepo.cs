@@ -32,6 +32,8 @@ public abstract class BaseRepo<T> : IRepo<T> where T : BaseEntity
 
     public virtual async Task<T> CreateAsync(T entity)
     {
+        entity.ValidFrom = DateTime.UtcNow;
+        entity.ValidTo = DateTime.UtcNow;
         await _dbSet.AddAsync(entity);
         await _context.SaveChangesAsync();
         return entity;

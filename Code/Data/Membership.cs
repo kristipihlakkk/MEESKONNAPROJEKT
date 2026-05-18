@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Abc.Data;
+namespace Gym.Data;
+
 public class Membership : BaseEntity
 {
          public Guid Id { get; set; }
