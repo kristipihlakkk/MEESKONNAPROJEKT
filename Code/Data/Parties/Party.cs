@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using Gym.Data.Locations;
 
 
 namespace Gym.Data;
@@ -11,7 +12,6 @@ public abstract class Party : BaseEntity
 {
     public string? Notes { get; set; }
     public ICollection<Address> Addresses { get; set; } = [];
-    //Seda klassi ei olnud, kommenteerisin hetkeks välja, et build läbi läheks
-    //public ICollection<ContactMethod> ContactMethods { get; set; } = [];
+    public ICollection<ContactMethod> ContactMethods { get; set; } = [];
     public ICollection<PartyRole> Roles { get; set; } = [];
 }

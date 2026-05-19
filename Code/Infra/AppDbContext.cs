@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Gym.Data.Locations;
 
 namespace Gym.Infra
 {
@@ -30,6 +31,7 @@ namespace Gym.Infra
         public DbSet<Address> Addresses { get; set; }
         public DbSet<Holiday> Holidays { get; set; }
         public DbSet<OpenCloseTimes> OpenCloseTimes { get; set; }
+        public DbSet<ContactMethod> ContactMethods { get; set; }
 
     }
 }
