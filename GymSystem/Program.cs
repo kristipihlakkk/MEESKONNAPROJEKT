@@ -13,6 +13,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddScoped<IPersonsRepo, PersonsRepo>();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
