@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Gym.Data.Locations;
+using Gym.Data.Membership;
 
 namespace Gym.Infra
 {

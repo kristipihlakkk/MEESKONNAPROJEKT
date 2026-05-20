@@ -1,5 +1,6 @@
 ﻿using Common;
 using Gym.Data;
+using Gym.Data.Membership;
 using System;
 using System.Collections.Generic;
 using System.Text;
