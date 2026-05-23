@@ -1,6 +1,7 @@
 ﻿@page "/persons"
 @using Gym.Data
 @using Gym.Infra
+@using Gym.Data.Locations
 @inject IPersonsRepo PersonsRepo
 @inject NavigationManager Navigation
 
@@ -10,7 +11,15 @@
 
 <table class="table">
     <thead>
-        <tr><th>First Name</th><th>Last Name</th><th>Email</th><th>Actions</th></tr>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Birth Date</th>
+            <th>Addresses</th>
+            <th>Contact Methods</th>
+            <th>Actions</th>
+        </tr>
     </thead>
     <tbody>
         @foreach (var person in persons)
@@ -19,9 +28,36 @@
                 <td>@person.FirstName</td>
                 <td>@person.LastName</td>
                 <td>@person.Email</td>
+                <td>@(person.BirthDate?.ToString("yyyy-MM-dd") ?? "N/A")</td>
                 <td>
-                    <a href="/persons/edit/@person.Id">Edit</a> |
-                    <a href="/persons/delete/@person.Id">Delete</a>
+                    @if (person.Addresses != null && person.Addresses.Any())
+                    {
+                        @foreach (var a in person.Addresses)
+                        {
+                            <span class="badge bg-secondary me-1">@a.AddressLine1, @a.City</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>
+                    @if (person.ContactMethods != null && person.ContactMethods.Any())
+                    {
+                        @foreach (var c in person.ContactMethods)
+                        {
+                            <span class="badge bg-info me-1">@c.Type: @c.Value</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>
+                    <a href="/persons/edit/@person.Id" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="/persons/delete/@person.Id" class="btn btn-sm btn-danger">Delete</a>
                 </td>
             </tr>
         }
