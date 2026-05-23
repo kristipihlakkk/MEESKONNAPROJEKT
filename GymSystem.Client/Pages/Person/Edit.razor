@@ -1,6 +1,7 @@
 ﻿@page "/persons/edit/{id:guid}"
 @using Gym.Data
 @using Gym.Infra
+@using Gym.Data.Locations
 @inject IPersonsRepo PersonsRepo
 @inject NavigationManager Navigation
 
@@ -25,6 +26,47 @@
     <div class="mb-3">
         <label for="birthDate">Birth Date</label>
         <InputDate id="birthDate" class="form-control" @bind-Value="person.BirthDate" />
+        <h5 class="mt-4">Addresses</h5>
+        @foreach (var a in person.Addresses)
+        {
+            <div class="card mb-2">
+                <div class="card-body">
+                    <p>@a.AddressLine1, @a.City, @a.Country</p>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => person.Addresses.Remove(a)">Delete</button>
+                </div>
+            </div>
+        }
+        <div class="card mb-3">
+            <div class="card-body">
+                <input class="form-control mb-2" @bind="newLine1" placeholder="Address Line 1" />
+                <input class="form-control mb-2" @bind="newCity" placeholder="City" />
+                <input class="form-control mb-2" @bind="newCountry" placeholder="Country" />
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="AddAddress">Add Address</button>
+            </div>
+        </div>
+
+        <h5 class="mt-4">Contact Methods</h5>
+        @foreach (var c in person.ContactMethods)
+        {
+            <div class="card mb-2">
+                <div class="card-body">
+                    <p>@c.Type: @c.Value</p>
+                    <button type="button" class="btn btn-danger btn-sm" @onclick="() => person.ContactMethods.Remove(c)">Delete</button>
+                </div>
+            </div>
+        }
+        <div class="card mb-3">
+            <div class="card-body">
+                <select class="form-control mb-2" @bind="newContactType">
+                    @foreach (var t in Enum.GetValues<ContactType>())
+                    {
+                        <option value="@t">@t</option>
+                    }
+                </select>
+                <input class="form-control mb-2" @bind="newContactValue" placeholder="nt +372 5555 1234" />
+                <button type="button" class="btn btn-secondary btn-sm" @onclick="AddContact">Add Contact</button>
+            </div>
+        </div>
     </div>
 
     <button type="submit" class="btn btn-primary">Save</button>
@@ -34,6 +76,29 @@
 @code {
     [Parameter] public Guid Id { get; set; }
     private Person person = new();
+    private string newLine1 = string.Empty;
+    private string newCity = string.Empty;
+    private string newCountry = string.Empty;
+    private ContactType newContactType = ContactType.Phone;
+    private string newContactValue = string.Empty;
+
+    private void AddAddress()
+    {
+        if (!string.IsNullOrEmpty(newLine1))
+        {
+            person.Addresses.Add(new Address { AddressLine1 = newLine1, City = newCity, Country = newCountry });
+            newLine1 = newCity = newCountry = string.Empty;
+        }
+    }
+
+    private void AddContact()
+    {
+        if (!string.IsNullOrEmpty(newContactValue))
+        {
+            person.ContactMethods.Add(new ContactMethod { Type = newContactType, Value = newContactValue });
+            newContactValue = string.Empty;
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
