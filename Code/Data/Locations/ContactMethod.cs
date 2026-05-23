@@ -6,7 +6,6 @@ namespace Gym.Data.Locations;
 public enum ContactType
 {
     Phone,
-    Email,
     Other
 }
 
