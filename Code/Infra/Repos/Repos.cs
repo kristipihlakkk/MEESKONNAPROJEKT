@@ -18,6 +18,12 @@ public sealed class PersonsRepo : BaseRepo<Person>, IPersonsRepo
             .Include(p => p.Addresses)
             .Include(p => p.ContactMethods)
             .FirstOrDefaultAsync(p => p.Id == id);
+
+    public override async Task<IEnumerable<Person>> GetAsync(Query query)
+        => await _context.Persons
+            .Include(p => p.Addresses)
+            .Include(p => p.ContactMethods)
+            .ToListAsync();
 }
 
 public sealed class LocationsRepo : BaseRepo<Location>, ILocationsRepo
