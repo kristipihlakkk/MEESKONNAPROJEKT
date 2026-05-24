@@ -44,9 +44,7 @@ public class RoomsRepo(AppDbContext c = null)
 public class AddressesRepo(AppDbContext c = null)
     : EfBaseRepo<AppDbContext, Address>(c), IAddressesRepo { }
 
-    public override async Task<IEnumerable<Room>> GetAsync(Query query)
-        => await _context.Rooms.ToListAsync();
-}
+
 public class LocationRoomsRepo(AppDbContext c = null)
     : EfBaseRepo<AppDbContext, LocationRooms>(c), ILocationRoomsRepo { }
 
@@ -77,15 +75,7 @@ public sealed class MembershipsRepo : BaseRepo<Membership>, IMembershipsRepo {
 public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo {
     public VisitsRepo(AppDbContext context) : base(context) { }
 }
-public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo
-{
-    public VisitsRepo(AppDbContext context) : base(context) { }
-}
 
-public sealed class MembershipsRepo : BaseRepo<Membership>, IMembershipsRepo
-{
-    public MembershipsRepo(AppDbContext context) : base(context) { }
-}
 
 public sealed class TrainersRepo : BaseRepo<Trainer>, ITrainersRepo
 {
