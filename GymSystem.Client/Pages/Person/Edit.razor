@@ -33,43 +33,45 @@
     {
         <div class="card mb-2">
             <div class="card-body">
-                <p>@a.AddressLine1, @a.City, @a.Country</p>
-                <button type="button" class="btn btn-danger btn-sm" @onclick="() => person.Addresses.Remove(a)">Delete</button>
+                <div class="mb-2">
+                    <label>Address Line 1</label>
+                    <input class="form-control" @bind="a.AddressLine1" />
+                </div>
+                <div class="mb-2">
+                    <label>City</label>
+                    <input class="form-control" @bind="a.City" />
+                </div>
+                <div class="mb-2">
+                    <label>Country</label>
+                    <input class="form-control" @bind="a.Country" />
+                </div>
             </div>
         </div>
     }
-    <div class="card mb-3">
-        <div class="card-body">
-            <input class="form-control mb-2" @bind="newLine1" placeholder="Address Line 1" />
-            <input class="form-control mb-2" @bind="newCity" placeholder="City" />
-            <input class="form-control mb-2" @bind="newCountry" placeholder="Country" />
-            <button type="button" class="btn btn-secondary btn-sm" @onclick="AddAddress">Add Address</button>
-        </div>
-    </div>
+    
 
     <h5 class="mt-4">Contact Methods</h5>
     @foreach (var c in person.ContactMethods)
     {
         <div class="card mb-2">
             <div class="card-body">
-                <p>@c.Type: @c.Value</p>
-                <button type="button" class="btn btn-danger btn-sm" @onclick="() => person.ContactMethods.Remove(c)">Delete</button>
+                <div class="mb-2">
+                    <label>Type</label>
+                    <select class="form-control" @bind="c.Type">
+                        @foreach (var t in Enum.GetValues<ContactType>())
+                        {
+                            <option value="@t">@t</option>
+                        }
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label>Value</label>
+                    <input class="form-control" @bind="c.Value" />
+                </div>
             </div>
         </div>
     }
-    <div class="card mb-3">
-        <div class="card-body">
-            <select class="form-control mb-2" @bind="newContactType">
-                @foreach (var t in Enum.GetValues<ContactType>())
-                {
-                    <option value="@t">@t</option>
-                }
-            </select>
-            <input class="form-control mb-2" @bind="newContactValue" placeholder="+372 5555 1234" />
-            <button type="button" class="btn btn-secondary btn-sm" @onclick="AddContact">Add Contact</button>
-        </div>
-    </div>
-
+    
     <button type="submit" class="btn btn-primary">Save</button>
     <a href="/persons" class="btn btn-secondary">Cancel</a>
 </EditForm>
@@ -77,29 +79,8 @@
 @code {
     [Parameter] public Guid Id { get; set; }
     private Person person = new();
-    private string newLine1 = string.Empty;
-    private string newCity = string.Empty;
-    private string newCountry = string.Empty;
-    private ContactType newContactType = ContactType.Phone;
-    private string newContactValue = string.Empty;
-
-    private void AddAddress()
-    {
-        if (!string.IsNullOrEmpty(newLine1))
-        {
-            person.Addresses.Add(new Address { AddressLine1 = newLine1, City = newCity, Country = newCountry });
-            newLine1 = newCity = newCountry = string.Empty;
-        }
-    }
-
-    private void AddContact()
-    {
-        if (!string.IsNullOrEmpty(newContactValue))
-        {
-            person.ContactMethods.Add(new ContactMethod { Type = newContactType, Value = newContactValue });
-            newContactValue = string.Empty;
-        }
-    }
+   
+    
 
     protected override async Task OnInitializedAsync()
     {
