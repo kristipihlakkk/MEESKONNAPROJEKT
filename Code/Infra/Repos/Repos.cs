@@ -1,9 +1,10 @@
 ﻿
 using Gym.Data;
+using Gym.Data.Membership;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace Gym.Infra;
@@ -46,4 +47,13 @@ public sealed class RoomsRepo : BaseRepo<Room>, IRoomsRepo
 
     public override async Task<IEnumerable<Room>> GetAsync(Query query)
         => await _context.Rooms.ToListAsync();
+
+    public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo
+    {
+        public VisitsRepo(AppDbContext context) : base(context) { }
+    }
+    public sealed class MembershipsRepo : BaseRepo<Membership>, IMembershipsRepo
+    {
+        public MembershipsRepo(AppDbContext context) : base(context) { }
+    }
 }

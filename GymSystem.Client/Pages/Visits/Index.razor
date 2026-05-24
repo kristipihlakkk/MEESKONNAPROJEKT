@@ -1,0 +1,89 @@
+﻿@page "/visits"
+@using Gym.Data
+@using Gym.Infra
+@inject IVisitsRepo VisitsRepo
+@inject IPersonsRepo PersonsRepo
+@inject IRoomsRepo RoomsRepo
+@inject NavigationManager Navigation
+
+<h3>Visits</h3>
+
+<a href="/visits/create" class="btn btn-primary mb-3">Create New</a>
+
+@if (visits is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h5 class="mt-3">Visit count per person</h5>
+    <table class="table table-sm mb-4">
+        <thead>
+            <tr>
+                <th>Person</th>
+                <th>Total visits</th>
+                <th>Last visit</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var person in persons)
+            {
+                var personVisits = visits.Where(v => v.Notes != null && v.Notes.StartsWith(person.Id.ToString())).ToList();
+                var last = personVisits.OrderByDescending(v => v.VisitDate).FirstOrDefault();
+                <tr>
+                    <td>@person.FirstName @person.LastName</td>
+                    <td><span class="badge bg-primary">@personVisits.Count</span></td>
+                    <td>@(last is null ? "—" : last.VisitDate.ToString("dd.MM.yyyy HH:mm"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h5>All visits</h5>
+    @if (!visits.Any())
+    {
+        <p class="text-muted">No visits yet.</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Person</th>
+                    <th>Room</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var visit in visits.OrderByDescending(v => v.VisitDate))
+                {
+                    var parts = visit.Notes?.Split('|') ?? Array.Empty<string>();
+                    var personName = parts.Length > 1 ? parts[1] : "—";
+                    var roomName = parts.Length > 2 ? parts[2] : "—";
+                    <tr>
+                        <td>@visit.VisitDate.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@personName</td>
+                        <td>@roomName</td>
+                        <td>
+                            <a href="/visits/edit/@visit.Id" class="btn btn-sm btn-primary">Edit</a>
+                            <a href="/visits/delete/@visit.Id" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <p class="text-muted">Total: <strong>@visits.Count</strong> visits</p>
+    }
+}
+
+@code {
+    private List<Visit>? visits;
+    private List<Person> persons = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        visits = (await VisitsRepo.GetAsync(new Query())).ToList();
+        persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+    }
+}
