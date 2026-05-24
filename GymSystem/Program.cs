@@ -1,8 +1,7 @@
-using Gym.Infra;
 using GymSystem.Client.Pages;
 using GymSystem.Components;
 using Microsoft.EntityFrameworkCore;
-using static Gym.Infra.RoomsRepo;
+using Gym.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +17,7 @@ builder.Services.AddScoped<ILocationsRepo, LocationsRepo>();
 builder.Services.AddScoped<IRoomsRepo, RoomsRepo>();
 builder.Services.AddScoped<IVisitsRepo, VisitsRepo>();
 builder.Services.AddScoped<IMembershipsRepo, MembershipsRepo>();
+builder.Services.AddScoped<ITrainersRepo, TrainersRepo>();
 
 var app = builder.Build();
 
@@ -30,11 +30,10 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
-
 app.UseAntiforgery();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

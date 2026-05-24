@@ -1,11 +1,6 @@
-﻿
-using Gym.Data;
+﻿using Gym.Data;
 using Gym.Data.Membership;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 
 namespace Gym.Infra;
 
@@ -53,13 +48,29 @@ public sealed class RoomsRepo : BaseRepo<Room>, IRoomsRepo
 
     public override async Task<IEnumerable<Room>> GetAsync(Query query)
         => await _context.Rooms.ToListAsync();
+}
 
-    public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo
-    {
-        public VisitsRepo(AppDbContext context) : base(context) { }
-    }
-    public sealed class MembershipsRepo : BaseRepo<Membership>, IMembershipsRepo
-    {
-        public MembershipsRepo(AppDbContext context) : base(context) { }
-    }
+public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo
+{
+    public VisitsRepo(AppDbContext context) : base(context) { }
+}
+
+public sealed class MembershipsRepo : BaseRepo<Membership>, IMembershipsRepo
+{
+    public MembershipsRepo(AppDbContext context) : base(context) { }
+}
+
+public sealed class TrainersRepo : BaseRepo<Trainer>, ITrainersRepo
+{
+    public TrainersRepo(AppDbContext context) : base(context) { }
+
+    public override async Task<Trainer?> GetAsync(Guid id)
+        => await _context.Trainers
+            .Include(t => t.Person)
+            .FirstOrDefaultAsync(t => t.Id == id);
+
+    public override async Task<IEnumerable<Trainer>> GetAsync(Query query)
+        => await _context.Trainers
+            .Include(t => t.Person)
+            .ToListAsync();
 }
