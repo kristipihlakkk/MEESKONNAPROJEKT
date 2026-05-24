@@ -14,7 +14,7 @@
     <dd class="col-sm-10">@booking?.BookingTitle</dd>
 
     <dt class="col-sm-2">Room</dt>
-    <dd class="col-sm-10">@booking?.RoomBookings?.Room?.Name</dd>
+    <dd class="col-sm-10">@booking?.RoomBookings?.FirstOrDefault()?.Room?.Name</dd>
 
     <dt class="col-sm-2">Booked By</dt>
     <dd class="col-sm-10">@booking?.BookedBy?.FullName</dd>

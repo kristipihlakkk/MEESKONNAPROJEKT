@@ -52,6 +52,7 @@ public class AddressesRepo(AppDbContext c = null)
 public class LocationRoomsRepo(AppDbContext c = null)
     : EfBaseRepo<AppDbContext, LocationRooms>(c), ILocationRoomsRepo { }
 
+
 public sealed class BookingsRepo : BaseRepo<Booking>, IBookingsRepo
 {
     public BookingsRepo(AppDbContext context) : base(context) { }
@@ -71,3 +72,10 @@ public sealed class BookingsRepo : BaseRepo<Booking>, IBookingsRepo
 
 public class RoomBookingsRepo(AppDbContext c = null)
     : EfBaseRepo<AppDbContext, RoomBookings>(c), IRoomBookingsRepo { }
+public sealed class MembershipsRepo : BaseRepo<Membership>, IMembershipsRepo {
+    public MembershipsRepo(AppDbContext context) : base(context) { }
+}
+
+public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo {
+    public VisitsRepo(AppDbContext context) : base(context) { }
+}

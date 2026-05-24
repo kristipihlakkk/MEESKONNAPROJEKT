@@ -25,7 +25,7 @@
         {
             <tr>
                 <td>@b.BookingTitle</td>
-                <td>@b.RoomBookings?.Room?.Name</td>
+                <td>@b.RoomBookings?.FirstOrDefault()?.Room?.Name</td>
                 <td>@b.BookedBy?.FullName</td>
                 <td>@b.StartsAt.ToString("g")</td>
                 <td>@b.EndsAt.ToString("g")</td>

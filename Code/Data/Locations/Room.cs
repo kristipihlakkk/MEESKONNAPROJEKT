@@ -1,4 +1,6 @@
 ﻿using Common;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Gym.Data;
 
@@ -6,8 +8,9 @@ public class Room : NamedEntity {
     public int Capacity { get; set; }
     public RoomType Type { get; set; }
     public string Description { get; set; } = "";
-    public ICollection<RoomBookings> RoomBookings { get; set; } = [];
-    public ICollection<Booking> Bookings => [.. RoomBookings.Select(rb => rb.Booking)];
+    // initialize collection and make navigation nullable-aware
+    public ICollection<RoomBookings> RoomBookings { get; set; } = new List<RoomBookings>();
+    public IEnumerable<Booking?> Bookings => RoomBookings?.Select(rb => rb.Booking) ?? Enumerable.Empty<Booking?>();
 }
 
 public enum RoomType {

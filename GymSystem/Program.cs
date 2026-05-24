@@ -14,12 +14,14 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddScoped<IPersonsRepo, PersonsRepo>();
+builder.Services.AddScoped<IMembershipsRepo, MembershipsRepo>();
 builder.Services.AddScoped<ILocationsRepo, LocationsRepo>();
 builder.Services.AddScoped<IRoomsRepo, RoomsRepo>();
 builder.Services.AddScoped<IAddressesRepo, AddressesRepo>();
 builder.Services.AddScoped<ILocationRoomsRepo, LocationRoomsRepo>();
 builder.Services.AddScoped<IBookingsRepo, BookingsRepo>();
 builder.Services.AddScoped<IRoomBookingsRepo, RoomBookingsRepo>();
+builder.Services.AddScoped<IVisitsRepo, VisitsRepo>();
 
 var app = builder.Build();
 

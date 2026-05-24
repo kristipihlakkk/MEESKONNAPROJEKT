@@ -1,4 +1,5 @@
 @page "/locations"
+@using System.Linq
 @using Gym.Data
 @using Gym.Infra
 @using Gym.Data.Locations
@@ -29,9 +30,9 @@
                 <td>@location.Address?.Country</td>
                 <td>@location.OpeningHours.ToString("HH:mm") - @location.ClosingHours.ToString("HH:mm")</td>
                 <td>
-                    @if (location.Rooms != null && location.Rooms.Any())
+                    @if (location.Rooms != null && location.Rooms.Any(r => r != null))
                     {
-                        @foreach (var r in location.Rooms)
+                        @foreach (var r in location.Rooms.Where(r => r != null))
                         {
                             <span class="badge bg-secondary me-1">@r.Name</span>
                         }

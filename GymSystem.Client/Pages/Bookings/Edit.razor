@@ -79,7 +79,8 @@
         {
             try {
                 if (booking.BookedBy != null) selectedPersonIdString = booking.BookedBy.Id.ToString();
-                if (booking.RoomBookings?.RoomId != null) selectedRoomIdString = booking.RoomBookings.RoomId.ToString();
+                var existingRb = booking.RoomBookings?.FirstOrDefault();
+                if (existingRb?.RoomId != null) selectedRoomIdString = existingRb.RoomId.ToString();
                 startsAtString = booking.StartsAt.ToString("yyyy-MM-ddTHH:mm");
                 endsAtString = booking.EndsAt.ToString("yyyy-MM-ddTHH:mm");
             } catch { }
@@ -98,7 +99,7 @@
         await BookingsRepo.UpdateAsync(booking);
 
         // ensure room booking points to selected room
-        var existingRb = booking.RoomBookings;
+        var existingRb = booking.RoomBookings?.FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(selectedRoomIdString) && Guid.TryParse(selectedRoomIdString, out var rid))
         {
             if (existingRb == null || existingRb.RoomId != rid)
