@@ -1,0 +1,185 @@
+﻿@page "/visits/create"
+@using Gym.Data
+@using Gym.Data.Membership
+@using Gym.Infra
+@inject IVisitsRepo VisitsRepo
+@inject IPersonsRepo PersonsRepo
+@inject IRoomsRepo RoomsRepo
+@inject IMembershipsRepo MembershipsRepo
+@inject NavigationManager Navigation
+
+<h3>Create Visit</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="@visit" OnValidSubmit="@CreateVisit" FormName="CreateVisit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Person</label>
+        <select class="form-control" value="@selectedPersonId"
+                @onchange="OnPersonChanged">
+            <option value="">— select person —</option>
+            @foreach (var p in persons)
+            {
+                <option value="@p.Id">@p.FirstName @p.LastName</option>
+            }
+        </select>
+    </div>
+
+    @if (membershipStatus is not null)
+    {
+        <div class="alert @(membershipOk ? "alert-success" : "alert-warning") mb-3">
+            @membershipStatus
+        </div>
+    }
+
+    <div class="mb-3">
+        <label>Room</label>
+        <select class="form-control" value="@selectedRoomId"
+                @onchange="OnRoomChanged">
+            <option value="">— select room —</option>
+            @foreach (var r in rooms)
+            {
+                <option value="@r.Id">@r.Name (@r.Type) — max @r.Capacity</option>
+            }
+        </select>
+    </div>
+
+    @if (capacityStatus is not null)
+    {
+        <div class="alert @(capacityOk ? "alert-success" : "alert-warning") mb-3">
+            @capacityStatus
+        </div>
+    }
+
+    <div class="mb-3">
+        <label>Visit Date</label>
+        <input type="datetime-local" class="form-control"
+               value="@newDate"
+               @onchange="e => newDate = e.Value?.ToString() ?? newDate" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Create</button>
+    <a href="/visits" class="btn btn-secondary">Cancel</a>
+</EditForm>
+
+@code {
+    private Visit visit = new();
+    private List<Person> persons = new();
+    private List<Room> rooms = new();
+    private List<Membership> memberships = new();
+    private List<Visit> allVisits = new();
+    private string selectedPersonId = "";
+    private string selectedRoomId = "";
+    private string newDate = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+    private string? membershipStatus;
+    private bool membershipOk = false;
+    private string? capacityStatus;
+    private bool capacityOk = false;
+    private string errorMessage = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+        rooms = (await RoomsRepo.GetAsync(new Query())).ToList();
+        memberships = (await MembershipsRepo.GetAsync(new Query())).ToList();
+        allVisits = (await VisitsRepo.GetAsync(new Query())).ToList();
+    }
+
+    private void OnPersonChanged(ChangeEventArgs e)
+    {
+        selectedPersonId = e.Value?.ToString() ?? "";
+        CheckMembership();
+    }
+
+    private void OnRoomChanged(ChangeEventArgs e)
+    {
+        selectedRoomId = e.Value?.ToString() ?? "";
+        CheckCapacity();
+    }
+
+    private void CheckMembership()
+    {
+        if (string.IsNullOrEmpty(selectedPersonId)) { membershipStatus = null; return; }
+
+        var personId = Guid.Parse(selectedPersonId);
+        var membership = memberships
+            .Where(m => m.MemberId == personId)
+            .OrderByDescending(m => m.EndDate)
+            .FirstOrDefault();
+
+        if (membership is null)
+        {
+            membershipStatus = "This person has no membership.";
+            membershipOk = false;
+        }
+        else if (membership.IsActive())
+        {
+            membershipStatus = $"Active membership: {membership.MembershipType}, expires {membership.EndDate:dd.MM.yyyy} ({membership.DaysRemaining()} days left).";
+            membershipOk = true;
+        }
+        else
+        {
+            membershipStatus = $" Membership expired on {membership.EndDate:dd.MM.yyyy}.";
+            membershipOk = false;
+        }
+    }
+
+    private void CheckCapacity()
+    {
+        if (string.IsNullOrEmpty(selectedRoomId)) { capacityStatus = null; return; }
+
+        var room = rooms.FirstOrDefault(r => r.Id.ToString() == selectedRoomId);
+        if (room is null) return;
+
+        var visitDate = DateTime.Parse(newDate);
+        var todayVisits = allVisits.Count(v =>
+            v.Notes != null &&
+            v.Notes.Contains($"|{room.Name}") &&
+            v.VisitDate.Date == visitDate.Date);
+
+        if (todayVisits >= room.Capacity)
+        {
+            capacityStatus = $"Room '{room.Name}' is full today ({todayVisits}/{room.Capacity} visits).";
+            capacityOk = false;
+        }
+        else
+        {
+            capacityStatus = $" Room '{room.Name}' has space: {todayVisits}/{room.Capacity} today.";
+            capacityOk = true;
+        }
+    }
+
+    private async Task CreateVisit()
+    {
+        if (string.IsNullOrEmpty(selectedPersonId))
+        {
+            errorMessage = "Please select a person.";
+            return;
+        }
+        if (!membershipOk)
+        {
+            errorMessage = "Cannot create visit — person has no active membership.";
+            return;
+        }
+        if (!string.IsNullOrEmpty(selectedRoomId) && !capacityOk)
+        {
+            errorMessage = "Cannot create visit — room is full.";
+            return;
+        }
+
+        var person = persons.FirstOrDefault(p => p.Id.ToString() == selectedPersonId);
+        var room = rooms.FirstOrDefault(r => r.Id.ToString() == selectedRoomId);
+
+        visit.VisitDate = DateTime.Parse(newDate);
+        visit.Notes = $"{person?.Id}|{person?.FirstName} {person?.LastName}|{room?.Name ?? "—"}";
+
+        await VisitsRepo.CreateAsync(visit);
+        Navigation.NavigateTo("/visits");
+    }
+}

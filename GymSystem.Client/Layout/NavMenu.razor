@@ -1,6 +1,5 @@
 ﻿@using Microsoft.AspNetCore.Components.Routing
 @implements IDisposable
-
 @inject NavigationManager NavigationManager
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -13,18 +12,15 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
-        <MyNavLink Href="" Match="NavLinkMatch.All" IconClass="home-icon" Text="Home" />
-        <MyNavLink Href="persons" IconClass="home-icon" Text="Persons" />
-        <MyNavLink Href="gymmembers" IconClass="home-icon" Text="Gym Members" />
-        <MyNavLink Href="trainers" IconClass="home-icon" Text="Trainers" />
-        <MyNavLink Href="memberships" IconClass="home-icon" Text="Memberships" />
-        <MyNavLink Href="addresses" IconClass="home-icon" Text="Addresses" />
-        <MyNavLink Href="locations" IconClass="home-icon" Text="Locations" />
-        <MyNavLink Href="locationrooms/create" IconClass="room-icon" Text="Location Rooms" />
-        <MyNavLink Href="rooms" IconClass="room-icon" Text="Rooms" />
-        <MyNavLink Href="bookings" IconClass="booking-icon" Text="Bookings" />
-        <MyNavLink Href="visits" IconClass="visit-icon" Text="Visits" />
-       
+        <MyNavLink Href="" Match="NavLinkMatch.All" IconClass="" Text="🏠 Home" />
+        <MyNavLink Href="persons" IconClass="" Text="👤 Persons" />
+        <MyNavLink Href="gymmembers" IconClass="" Text="🪪 Gym Members" />
+        <MyNavLink Href="trainers" IconClass="" Text="🏋️ Trainers" />
+        <MyNavLink Href="memberships" IconClass="" Text="💳 Memberships" />
+        <MyNavLink Href="locations" IconClass="" Text="📍 Locations" />
+        <MyNavLink Href="rooms" IconClass="" Text="🚪 Gym Rooms" />
+        <MyNavLink Href="bookings" IconClass="" Text="📅 Bookings" />
+        <MyNavLink Href="visits" IconClass="" Text="✅ Visits" />
     </nav>
 </div>
 
@@ -36,13 +32,13 @@
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
     }
-    
+
     private void OnLocationChanged(object sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
-    
+
     public void Dispose()
     {
         NavigationManager.LocationChanged -= OnLocationChanged;

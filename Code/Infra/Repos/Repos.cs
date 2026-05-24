@@ -1,9 +1,10 @@
 ﻿
 using Gym.Data;
+using Gym.Data.Membership;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace Gym.Infra;
@@ -17,6 +18,12 @@ public sealed class PersonsRepo : BaseRepo<Person>, IPersonsRepo
             .Include(p => p.Addresses)
             .Include(p => p.ContactMethods)
             .FirstOrDefaultAsync(p => p.Id == id);
+
+    public override async Task<IEnumerable<Person>> GetAsync(Query query)
+        => await _context.Persons
+            .Include(p => p.Addresses)
+            .Include(p => p.ContactMethods)
+            .ToListAsync();
 }
 
 public sealed class LocationsRepo : BaseRepo<Location>, ILocationsRepo
@@ -55,11 +62,11 @@ public sealed class BookingsRepo : BaseRepo<Booking>, IBookingsRepo
             .Include(b => b.RoomBookings)!.ThenInclude(rb => rb.Room)
             .FirstOrDefaultAsync(b => b.Id == id);
 
-    public override async Task<IEnumerable<Booking>> GetAsync(Query q)
-        => await _context.Set<Booking>()
-            .Include(b => b.BookedBy)
-            .Include(b => b.RoomBookings)!.ThenInclude(rb => rb.Room)
-            .ToListAsync();
+        public override async Task<IEnumerable<Booking>> GetAsync(Query query)
+            => await _context.Set<Booking>()
+                .Include(b => b.BookedBy)
+                .Include(b => b.RoomBookings)!.ThenInclude(rb => rb.Room)
+                .ToListAsync();
 }
 
 public class RoomBookingsRepo(AppDbContext c = null)
