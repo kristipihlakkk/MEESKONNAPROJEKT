@@ -1,0 +1,118 @@
+@page "/bookings/edit/{id:guid}"
+@using Gym.Data
+@using Gym.Infra
+@using Gym.Data.Locations
+@inject IBookingsRepo BookingsRepo
+@inject IRoomsRepo RoomsRepo
+@inject IPersonsRepo PersonsRepo
+@inject IRoomBookingsRepo RoomBookingsRepo
+@inject NavigationManager Navigation
+
+<h3>Edit Booking</h3>
+
+<EditForm Model="@booking" OnValidSubmit="UpdateBooking">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Title</label>
+        <InputText class="form-control" @bind-Value="booking.BookingTitle" />
+    </div>
+
+    <div class="mb-3">
+        <label>Booked By</label>
+        <select class="form-control" @bind="selectedPersonIdString">
+            <option value="">-- Select person --</option>
+            @foreach (var p in persons)
+            {
+                <option value="@p.Id">@p.FirstName @p.LastName</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Room</label>
+        <select class="form-control" @bind="selectedRoomIdString">
+            <option value="">-- Select room --</option>
+            @foreach (var r in rooms)
+            {
+                <option value="@r.Id">@r.Name (@r.Type)</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label>Starts At</label>
+        <InputText class="form-control" type="datetime-local" @bind-Value="startsAtString" />
+    </div>
+    <div class="mb-3">
+        <label>Ends At</label>
+        <InputText class="form-control" type="datetime-local" @bind-Value="endsAtString" />
+    </div>
+
+    <div class="mb-3">
+        <label>Notes</label>
+        <InputTextArea class="form-control" @bind-Value="booking.Notes" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a href="/bookings" class="btn btn-secondary ms-2">Cancel</a>
+</EditForm>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private Booking booking = new();
+    private List<Room> rooms = new();
+    private List<Person> persons = new();
+    private string selectedRoomIdString = string.Empty;
+    private string selectedPersonIdString = string.Empty;
+    private string startsAtString = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm");
+    private string endsAtString = DateTime.UtcNow.AddHours(1).ToString("yyyy-MM-ddTHH:mm");
+
+    protected override async Task OnInitializedAsync()
+    {
+        rooms = (await RoomsRepo.GetAsync(new Query())).ToList();
+        persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+        booking = await BookingsRepo.GetAsync(Id);
+        if (booking == null) Navigation.NavigateTo("/bookings");
+        else
+        {
+            try {
+                if (booking.BookedBy != null) selectedPersonIdString = booking.BookedBy.Id.ToString();
+                if (booking.RoomBookings?.RoomId != null) selectedRoomIdString = booking.RoomBookings.RoomId.ToString();
+                startsAtString = booking.StartsAt.ToString("yyyy-MM-ddTHH:mm");
+                endsAtString = booking.EndsAt.ToString("yyyy-MM-ddTHH:mm");
+            } catch { }
+        }
+    }
+
+    private async Task UpdateBooking()
+    {
+        if (!string.IsNullOrWhiteSpace(selectedPersonIdString) && Guid.TryParse(selectedPersonIdString, out var pid))
+        {
+            booking.BookedBy = await PersonsRepo.GetAsync(pid);
+        }
+        if (!string.IsNullOrWhiteSpace(startsAtString)) booking.StartsAt = DateTimeOffset.Parse(startsAtString);
+        if (!string.IsNullOrWhiteSpace(endsAtString)) booking.EndsAt = DateTimeOffset.Parse(endsAtString);
+
+        await BookingsRepo.UpdateAsync(booking);
+
+        // ensure room booking points to selected room
+        var existingRb = booking.RoomBookings;
+        if (!string.IsNullOrWhiteSpace(selectedRoomIdString) && Guid.TryParse(selectedRoomIdString, out var rid))
+        {
+            if (existingRb == null || existingRb.RoomId != rid)
+            {
+                if (existingRb != null) await RoomBookingsRepo.DeleteAsync(existingRb.Id);
+                var newRb = new RoomBookings { BookingId = booking.Id, RoomId = rid };
+                await RoomBookingsRepo.CreateAsync(newRb);
+            }
+        }
+        else if (existingRb != null && (string.IsNullOrWhiteSpace(selectedRoomIdString) || !Guid.TryParse(selectedRoomIdString, out _)))
+        {
+            await RoomBookingsRepo.DeleteAsync(existingRb.Id);
+        }
+
+        Navigation.NavigateTo("/bookings");
+    }
+}

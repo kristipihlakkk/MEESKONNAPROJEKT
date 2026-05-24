@@ -1,0 +1,157 @@
+@page "/locationrooms/create"
+@page "/locationrooms/create/{locationId?}"
+@using Gym.Data
+@using Gym.Infra
+@using Gym.Data.Locations
+@inject ILocationsRepo LocationsRepo
+@inject IRoomsRepo RoomsRepo
+@inject ILocationRoomsRepo LocationRoomsRepo
+@inject NavigationManager Navigation
+
+<h3>Assign Rooms to Location</h3>
+
+<EditForm OnValidSubmit="SaveLocationRooms">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Location</label>
+        <select class="form-control" @onchange="OnLocationSelected">
+            <option value="">-- Select location --</option>
+            @foreach (var l in locations)
+            {
+                <option value="@l.Id">@l.Address?.AddressLine1, @l.Address?.City (@l.Address?.Country)</option>
+            }
+        </select>
+    </div>
+
+    @if (selectedLocation != null)
+    {
+        <div class="mb-3">
+            <label class="form-label">Address</label>
+            <div>@selectedLocation.Address?.AddressLine1</div>
+            @if (!string.IsNullOrEmpty(selectedLocation.Address?.AddressLine2)) { <div>@selectedLocation.Address.AddressLine2</div> }
+            <div>@selectedLocation.Address?.City @if(!string.IsNullOrEmpty(selectedLocation.Address?.PostalCode)){ <text>- @selectedLocation.Address.PostalCode</text> }</div>
+            <div>@selectedLocation.Address?.Country</div>
+        </div>
+    }
+
+    <div class="mb-3">
+        <label>Rooms (select one or many)</label>
+        @if (rooms != null && rooms.Any())
+        {
+            <div>
+                @foreach (var r in rooms)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="room_@r.Id" checked="@selectedRoomIds.Contains(r.Id)" @onchange="@(_ => ToggleRoom(r.Id))" />
+                        <label class="form-check-label" for="room_@r.Id">@r.Name (@r.Type)</label>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-muted">No rooms available.</div>
+        }
+    </div>
+
+    <button class="btn btn-success" type="submit">Save</button>
+    <a class="btn btn-secondary ms-2" href="/locations">Cancel</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public Guid? locationId { get; set; }
+
+    private List<Location> locations = new();
+    private List<Room> rooms = new();
+    private string selectedLocationIdString = string.Empty;
+    private HashSet<Guid> selectedRoomIds = new();
+    private Location selectedLocation;
+
+    protected override async Task OnInitializedAsync()
+    {
+        locations = (await LocationsRepo.GetAsync(new Query())).ToList();
+        rooms = (await RoomsRepo.GetAsync(new Query())).ToList();
+
+        if (locationId != null && locationId != Guid.Empty)
+        {
+            selectedLocationIdString = locationId.ToString();
+            await LoadSelectedLocation();
+        }
+    }
+
+    private async Task OnLocationSelected(ChangeEventArgs e)
+    {
+        selectedLocationIdString = e?.Value?.ToString() ?? string.Empty;
+        await LoadSelectedLocation();
+    }
+
+    private async Task LoadSelectedLocation()
+    {
+        if (Guid.TryParse(selectedLocationIdString, out var lid))
+        {
+            selectedLocation = await LocationsRepo.GetAsync(lid);
+
+            // populate selectedRoomIds from already assigned rooms
+            selectedRoomIds.Clear();
+            if (selectedLocation?.LocationRooms != null)
+            {
+                foreach (var lr in selectedLocation.LocationRooms)
+                {
+                    if (lr.RoomId != null) selectedRoomIds.Add(lr.RoomId.Value);
+                }
+            }
+        }
+        else
+        {
+            selectedLocation = null;
+            selectedRoomIds.Clear();
+        }
+
+        StateHasChanged();
+    }
+
+    private void ToggleRoom(Guid id)
+    {
+        if (selectedRoomIds.Contains(id)) selectedRoomIds.Remove(id);
+        else selectedRoomIds.Add(id);
+    }
+
+    private async Task SaveLocationRooms()
+    {
+        if (!Guid.TryParse(selectedLocationIdString, out var lid)) return;
+
+        // reload location to ensure fresh data
+        var loc = await LocationsRepo.GetAsync(lid);
+        var existingRoomIds = new HashSet<Guid>(loc?.LocationRooms?.Where(x => x.RoomId != null).Select(x => x.RoomId!.Value) ?? Enumerable.Empty<Guid>());
+
+        // Add new assignments
+        foreach (var rid in selectedRoomIds)
+        {
+            if (existingRoomIds.Contains(rid)) continue; // skip existing
+            try {
+                var newLr = new LocationRooms { LocationId = lid, RoomId = rid };
+                await LocationRoomsRepo.CreateAsync(newLr);
+            } catch (Exception ex) {
+                Console.Error.WriteLine($"Failed to create LocationRooms for location {lid} room {rid}: {ex}");
+            }
+        }
+
+        // Remove assignments that were unchecked
+        if (loc?.LocationRooms != null)
+        {
+            var toRemove = loc.LocationRooms.Where(lr => lr.RoomId != null && !selectedRoomIds.Contains(lr.RoomId.Value)).ToList();
+            foreach (var rem in toRemove)
+            {
+                try {
+                    await LocationRoomsRepo.DeleteAsync(rem.Id);
+                } catch (Exception ex) {
+                    Console.Error.WriteLine($"Failed to remove LocationRooms {rem.Id} for location {lid}: {ex}");
+                }
+            }
+        }
+
+        Navigation.NavigateTo("/locations");
+    }
+}

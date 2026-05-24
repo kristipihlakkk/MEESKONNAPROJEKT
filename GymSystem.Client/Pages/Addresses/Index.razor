@@ -1,0 +1,48 @@
+@page "/addresses"
+@using Gym.Data
+@using Gym.Infra
+@using Gym.Data.Locations
+@inject IAddressesRepo AddressesRepo
+@inject NavigationManager Navigation
+
+<h3>Addresses</h3>
+
+<a href="/addresses/create" class="btn btn-primary mb-3">Create New</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Address Line 1</th>
+            <th>Address Line 2</th>
+            <th>City</th>
+            <th>Postal Code</th>
+            <th>Country</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in addresses)
+        {
+            <tr>
+                <td>@a.AddressLine1</td>
+                <td>@a.AddressLine2</td>
+                <td>@a.City</td>
+                <td>@a.PostalCode</td>
+                <td>@a.Country</td>
+                <td>
+                    <a href="/addresses/edit/@a.Id" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="/addresses/delete/@a.Id" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Address> addresses = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        addresses = (await AddressesRepo.GetAsync(new Query())).ToList();
+    }
+}

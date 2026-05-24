@@ -36,7 +36,6 @@ else
                     <td>@room.Name</td>
                     <td><span class="badge bg-info">@room.Type</span></td>
                     <td>@room.Capacity</td>
-                    <td>@room.OpenFrom.ToString("HH:mm") – @room.OpenTo.ToString("HH:mm")</td>
                     <td>@(string.IsNullOrEmpty(room.Description) ? "—" : room.Description)</td>
                     <td>
                         <a href="/gymrooms/edit/@room.Id" class="btn btn-sm btn-primary">Edit</a>

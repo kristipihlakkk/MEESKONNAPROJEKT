@@ -1,0 +1,61 @@
+@page "/locations"
+@using Gym.Data
+@using Gym.Infra
+@using Gym.Data.Locations
+@inject ILocationsRepo LocationsRepo
+@inject NavigationManager Navigation
+
+<h3>Locations</h3>
+
+<a href="/locations/create" class="btn btn-primary mb-3">Create New</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Address</th>
+            <th>City</th>
+            <th>Country</th>
+            <th>Open</th>
+            <th>Rooms</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var location in locations)
+        {
+            <tr>
+                <td>@location.Address?.AddressLine1</td>
+                <td>@location.Address?.City</td>
+                <td>@location.Address?.Country</td>
+                <td>@location.OpeningHours.ToString("HH:mm") - @location.ClosingHours.ToString("HH:mm")</td>
+                <td>
+                    @if (location.Rooms != null && location.Rooms.Any())
+                    {
+                        @foreach (var r in location.Rooms)
+                        {
+                            <span class="badge bg-secondary me-1">@r.Name</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">—</span>
+                    }
+                </td>
+                <td>
+                    <a href="/locations/edit/@location.Id" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="/locations/delete/@location.Id" class="btn btn-sm btn-danger">Delete</a>
+                    <a href="/locationrooms/create/@location.Id" class="btn btn-sm btn-secondary ms-1">Manage Rooms</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Location> locations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        locations = (await LocationsRepo.GetAsync(new Query())).ToList();
+    }
+}

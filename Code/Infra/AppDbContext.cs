@@ -30,8 +30,6 @@ namespace Gym.Infra
         public DbSet<LocationRooms> LocationRooms { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Address> Addresses { get; set; }
-        public DbSet<Holiday> Holidays { get; set; }
-        public DbSet<OpenCloseTimes> OpenCloseTimes { get; set; }
         public DbSet<ContactMethod> ContactMethods { get; set; }
 
     }
