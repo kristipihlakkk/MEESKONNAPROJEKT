@@ -1,0 +1,59 @@
+﻿@page "/trainers/create"
+@using Gym.Data
+@using Gym.Infra
+@inject ITrainersRepo TrainersRepo
+@inject IPersonsRepo PersonsRepo
+@inject NavigationManager Navigation
+
+<h3>Create Trainer</h3>
+
+<EditForm Model="@trainer" OnValidSubmit="@CreateTrainer" FormName="CreateTrainer">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Person</label>
+        <select class="form-control" value="@selectedPersonId" @onchange="e => selectedPersonId = e.Value?.ToString() ?? string.Empty">
+            <option value="">— select person —</option>
+            @foreach (var p in persons)
+            {
+                <option value="@p.Id">@p.FirstName @p.LastName</option>
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Specialisation</label>
+        <input class="form-control" @bind="trainer.Specialisation" placeholder="e.g. Cardio, Strength" />
+    </div>
+    <div class="mb-3">
+        <label>Bio</label>
+        <textarea class="form-control" @bind="trainer.Bio" rows="3" placeholder="optional"></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Start Date</label>
+        <input type="date" class="form-control" @bind="trainer.StartDate" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Create</button>
+    <a href="/trainers" class="btn btn-secondary">Cancel</a>
+</EditForm>
+
+@code {
+    private Trainer trainer = new() { StartDate = DateTime.Today };
+    private List<Gym.Data.Person> persons = new();
+    private string selectedPersonId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+    }
+
+    private async Task CreateTrainer()
+    {
+        if (string.IsNullOrEmpty(selectedPersonId)) return;
+        trainer.PersonId = Guid.Parse(selectedPersonId);
+        trainer.RoleType = "Trainer";
+        await TrainersRepo.CreateAsync(trainer);
+        Navigation.NavigateTo("/trainers");
+    }
+}

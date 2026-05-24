@@ -1,0 +1,65 @@
+﻿@page "/trainers"
+@using Gym.Data
+@using Gym.Infra
+@inject ITrainersRepo TrainersRepo
+@inject NavigationManager Navigation
+
+<h3>🏋️ Trainers</h3>
+
+<a href="/trainers/create" class="btn btn-primary mb-3">Create New</a>
+
+@if (trainers is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!trainers.Any())
+{
+    <p class="text-muted">No trainers found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Specialisation</th>
+                <th>Bio</th>
+                <th>Active</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in trainers)
+            {
+                <tr>
+                    <td>@(t.Person?.FirstName) @(t.Person?.LastName)</td>
+                    <td>@t.Specialisation</td>
+                    <td>@(string.IsNullOrEmpty(t.Bio) ? "—" : t.Bio)</td>
+                    <td>
+                        @if (t.IsActive())
+                        {
+                            <span class="badge bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Inactive</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="/trainers/edit/@t.Id" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="/trainers/delete/@t.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Trainer>? trainers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        trainers = (await TrainersRepo.GetAsync(new Query())).ToList();
+    }
+}
