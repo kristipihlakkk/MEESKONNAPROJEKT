@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using Gym.Data.Locations;
 
 
 namespace Gym.Data;

@@ -8,9 +8,9 @@ using System.Text;
 namespace Gym.Data;
  public sealed class Person : Party
     {
-    [Required] public string FirstName { get; set; } = string.Empty;
-    [Required] public string LastName { get; set; } = string.Empty;
+    [Required] public string FirstName { get; set; } = "";
+    [Required] public string LastName { get; set; } = "";
     public DateTime? BirthDate { get; set; }
-    [Required][EmailAddress] public string Email { get; set; } = string.Empty;
+    [Required][EmailAddress] public string Email { get; set; } = "";
     public string FullName => $"{FirstName} {LastName}";
 }

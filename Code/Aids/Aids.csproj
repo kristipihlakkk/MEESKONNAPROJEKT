@@ -4,8 +4,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AssemblyName>Abc.Aids</AssemblyName>
-    <RootNamespace>Abc.Aids</RootNamespace>
+    <AssemblyName>Gym.Aids</AssemblyName>
+    <RootNamespace>Gym.Aids</RootNamespace>
 	  <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 

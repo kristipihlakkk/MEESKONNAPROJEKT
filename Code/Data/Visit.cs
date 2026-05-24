@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Abc.Data;
+namespace Gym.Data;
 
-    public class Visit : BaseEntity
+public class Visit : BaseEntity
 {
         public Guid Id { get; set; }
 

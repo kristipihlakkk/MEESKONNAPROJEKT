@@ -1,12 +1,21 @@
 using GymSystem.Client.Pages;
 using GymSystem.Components;
+using Microsoft.EntityFrameworkCore;
+using Gym.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db"));
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddScoped<IPersonsRepo, PersonsRepo>();
+builder.Services.AddScoped<ILocationsRepo, LocationsRepo>();
+builder.Services.AddScoped<IRoomsRepo, RoomsRepo>();
 
 var app = builder.Build();
 

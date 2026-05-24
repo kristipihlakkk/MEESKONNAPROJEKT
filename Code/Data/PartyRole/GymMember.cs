@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
-using Gym.Data;
 using Common;
-using Abc.Data;
+using Gym.Data.Membership;
 
 namespace Gym.Data;
 
 public class GymMember : PartyRole
 {
-    public Membership? Membership { get; set; }
+    public MembershipType? Membership { get; set; }
 
     public List<Visit> Visits { get; set; } = new();
 

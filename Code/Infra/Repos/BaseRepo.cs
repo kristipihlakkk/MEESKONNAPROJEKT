@@ -32,8 +32,8 @@ public abstract class BaseRepo<T> : IRepo<T> where T : BaseEntity
 
     public virtual async Task<T> CreateAsync(T entity)
     {
-        entity.CreatedAt = DateTime.UtcNow;
-        entity.UpdatedAt = DateTime.UtcNow;
+        entity.ValidFrom = DateTime.UtcNow;
+        entity.ValidTo = DateTime.UtcNow;
         await _dbSet.AddAsync(entity);
         await _context.SaveChangesAsync();
         return entity;
@@ -41,7 +41,6 @@ public abstract class BaseRepo<T> : IRepo<T> where T : BaseEntity
 
     public virtual async Task<T> UpdateAsync(T entity)
     {
-        entity.UpdatedAt = DateTime.UtcNow;
         _dbSet.Update(entity);
         await _context.SaveChangesAsync();
         return entity;

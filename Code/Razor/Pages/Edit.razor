@@ -1,0 +1,64 @@
+﻿@page "/gymrooms/edit/{id:guid}"
+@using Gym.Data
+@using Gym.Infra
+@inject IRoomsRepo RoomsRepo
+@inject NavigationManager Navigation
+
+<h3>Edit Room</h3>
+
+@if (room is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label>Name</label>
+        <input class="form-control" @bind="room.Name" />
+    </div>
+    <div class="mb-3">
+        <label>Room Type</label>
+        <select class="form-control" @bind="room.Type">
+            @foreach (var t in Enum.GetValues<RoomType>())
+            {
+                <option value="@t">@t</option>
+            }
+        </select>
+    </div>
+    <div class="mb-3">
+        <label>Capacity</label>
+        <input type="number" class="form-control" @bind="room.Capacity" />
+    </div>
+    <div class="mb-3">
+        <label>Open From</label>
+        <input type="time" class="form-control" @bind="room.OpenFrom" />
+    </div>
+    <div class="mb-3">
+        <label>Open To</label>
+        <input type="time" class="form-control" @bind="room.OpenTo" />
+    </div>
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea class="form-control" @bind="room.Description" rows="3"></textarea>
+    </div>
+
+    <button class="btn btn-primary" @onclick="UpdateRoom">Save</button>
+    <a href="/gymrooms" class="btn btn-secondary">Cancel</a>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private Room? room;
+
+    protected override async Task OnInitializedAsync()
+    {
+        room = await RoomsRepo.GetAsync(Id);
+        if (room is null) Navigation.NavigateTo("/gymrooms");
+    }
+
+    private async Task UpdateRoom()
+    {
+        await RoomsRepo.UpdateAsync(room!);
+        Navigation.NavigateTo("/gymrooms");
+    }
+}

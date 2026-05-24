@@ -1,0 +1,65 @@
+﻿@page "/locations"
+@using Gym.Data
+@using Gym.Infra
+@inject ILocationsRepo LocationsRepo
+@inject NavigationManager Navigation
+
+<h3>Locations</h3>
+
+<a href="/locations/create" class="btn btn-primary mb-3">Create New</a>
+
+@if (locations is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (!locations.Any())
+{
+    <p class="text-muted">No locations found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>City</th>
+                <th>Country</th>
+                <th>Rooms</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var loc in locations)
+            {
+                <tr>
+                    <td>@(loc.Address?.AddressLine1 ?? "—")</td>
+                    <td>@(loc.Address?.City ?? "—")</td>
+                    <td>@(loc.Address?.Country ?? "—")</td>
+                    <td>
+                        @if (loc.LocationRooms != null && loc.LocationRooms.Any())
+                        {
+                            <span class="badge bg-secondary">@loc.LocationRooms.Count room(s)</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span>
+                        }
+                    </td>
+                    <td>
+                        <a href="/locations/edit/@loc.Id" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="/locations/delete/@loc.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Location>? locations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        locations = (await LocationsRepo.GetAsync(new Query())).ToList();
+    }
+}

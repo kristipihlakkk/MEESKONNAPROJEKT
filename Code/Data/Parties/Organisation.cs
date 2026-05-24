@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Text;
 
-namespace Abc.Data.Parties
+namespace Gym.Data;
+
+public sealed class Organisation : Party
 {
-    internal class Organisation
-    {
-    }
+    public string RegistrationNumber { get; set; } = "";
+    public string? Website { get; set; }
 }
