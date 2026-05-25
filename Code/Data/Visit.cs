@@ -7,8 +7,6 @@ namespace Gym.Data;
 
 public class Visit : BaseEntity
 {
-        public Guid Id { get; set; }
-
         public DateTime VisitDate { get; set; }
 
         public string? Notes { get; set; }
