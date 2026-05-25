@@ -1,40 +1,49 @@
-@page "/rooms"
+﻿@page "/rooms"
 @using Gym.Data
 @using Gym.Infra
 @using Gym.Data.Locations
 @inject IRoomsRepo RoomsRepo
 @inject NavigationManager Navigation
 
-<h3>Rooms</h3>
+<h3>Gym Rooms</h3>
 
 <a href="/rooms/create" class="btn btn-primary mb-3">Create New</a>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Capacity</th>
-            <th>Description</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var room in rooms)
-        {
+@if (!rooms.Any())
+{
+    <p class="text-muted">No rooms found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
             <tr>
-                <td>@room.Name</td>
-                <td>@room.Type</td>
-                <td>@room.Capacity</td>
-                <td>@room.Description</td>
-                <td>
-                    <a href="/rooms/edit/@room.Id" class="btn btn-sm btn-primary">Edit</a>
-                    <a href="/rooms/delete/@room.Id" class="btn btn-sm btn-danger">Delete</a>
-                </td>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Capacity</th>
+                <th>Open</th>
+                <th>Description</th>
+                <th>Actions</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var room in rooms)
+            {
+                <tr>
+                    <td><strong>@room.Name</strong></td>
+                    <td><span class="badge bg-info">@room.Type</span></td>
+                    <td>@room.Capacity</td>
+                    <td>@room.OpenFrom.ToString("HH:mm") – @room.OpenTo.ToString("HH:mm")</td>
+                    <td>@(string.IsNullOrEmpty(room.Description) ? "—" : room.Description)</td>
+                    <td>
+                        <a href="/rooms/edit/@room.Id" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="/rooms/delete/@room.Id" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
     private List<Room> rooms = new();

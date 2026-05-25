@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -10,15 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Pages\LocationRooms\**" />
+    <Content Remove="Pages\LocationRooms\**" />
+    <EmbeddedResource Remove="Pages\LocationRooms\**" />
+    <None Remove="Pages\LocationRooms\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.8" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Code\Infra\Infra.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Pages\LocationRooms\" />
   </ItemGroup>
 
 </Project>

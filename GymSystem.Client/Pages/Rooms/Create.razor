@@ -2,11 +2,15 @@
 @using Gym.Data
 @using Gym.Infra
 @using Gym.Data.Locations
-@using Microsoft.AspNetCore.Components.Forms
 @inject IRoomsRepo RoomsRepo
 @inject NavigationManager Navigation
 
 <h3>Create Room</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
 
 <EditForm Model="@room" OnValidSubmit="@CreateRoom" FormName="CreateRoom">
     <DataAnnotationsValidator />
@@ -14,7 +18,7 @@
 
     <div class="mb-3">
         <label>Name</label>
-        <InputText class="form-control" @bind-Value="room.Name" />
+        <InputText class="form-control" @bind-Value="room.Name" placeholder="e.g. Cardio Hall A" />
     </div>
     <div class="mb-3">
         <label>Type</label>
@@ -30,8 +34,20 @@
         <InputNumber class="form-control" @bind-Value="room.Capacity" />
     </div>
     <div class="mb-3">
+        <label>Open From</label>
+        <input type="time" class="form-control"
+               value="@openFrom"
+               @onchange="e => openFrom = e.Value?.ToString() ?? openFrom" />
+    </div>
+    <div class="mb-3">
+        <label>Open To</label>
+        <input type="time" class="form-control"
+               value="@openTo"
+               @onchange="e => openTo = e.Value?.ToString() ?? openTo" />
+    </div>
+    <div class="mb-3">
         <label>Description</label>
-        <InputTextArea class="form-control" @bind-Value="room.Description" />
+        <InputTextArea class="form-control" @bind-Value="room.Description" rows="3" placeholder="optional" />
     </div>
 
     <button type="submit" class="btn btn-success">Create</button>
@@ -40,9 +56,38 @@
 
 @code {
     private Room room = new();
+    private string openFrom = "06:00";
+    private string openTo = "22:00";
+    private string errorMessage = string.Empty;
 
     private async Task CreateRoom()
     {
+        errorMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(room.Name))
+        {
+            errorMessage = "Room name is required.";
+            return;
+        }
+        if (room.Capacity <= 0)
+        {
+            errorMessage = "Capacity must be greater than 0.";
+            return;
+        }
+        if (!TimeOnly.TryParse(openFrom, out var from) ||
+            !TimeOnly.TryParse(openTo, out var to))
+        {
+            errorMessage = "Invalid time format.";
+            return;
+        }
+        if (to <= from)
+        {
+            errorMessage = "Closing time must be after opening time.";
+            return;
+        }
+
+        room.OpenFrom = from;
+        room.OpenTo = to;
         await RoomsRepo.CreateAsync(room);
         Navigation.NavigateTo("/rooms");
     }

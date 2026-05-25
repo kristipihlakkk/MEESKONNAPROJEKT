@@ -21,9 +21,8 @@
 
     <div class="mb-3">
         <label>Person</label>
-        <select class="form-control" value="@selectedPersonId"
-                @onchange="OnPersonChanged">
-            <option value="">— select person —</option>
+        <select class="form-control" value="@selectedPersonId" @onchange="OnPersonChanged">
+            <option value="">-- Select person --</option>
             @foreach (var p in persons)
             {
                 <option value="@p.Id">@p.FirstName @p.LastName</option>
@@ -39,10 +38,9 @@
     }
 
     <div class="mb-3">
-        <label>Room</label>
-        <select class="form-control" value="@selectedRoomId"
-                @onchange="OnRoomChanged">
-            <option value="">— select room —</option>
+        <label>Room (optional)</label>
+        <select class="form-control" value="@selectedRoomId" @onchange="OnRoomChanged">
+            <option value="">-- Select room --</option>
             @foreach (var r in rooms)
             {
                 <option value="@r.Id">@r.Name (@r.Type) — max @r.Capacity</option>
@@ -58,13 +56,13 @@
     }
 
     <div class="mb-3">
-        <label>Visit Date</label>
+        <label>Visit Date & Time</label>
         <input type="datetime-local" class="form-control"
                value="@newDate"
                @onchange="e => newDate = e.Value?.ToString() ?? newDate" />
     </div>
 
-    <button type="submit" class="btn btn-success">Create</button>
+    <button type="submit" class="btn btn-success">Log Visit</button>
     <a href="/visits" class="btn btn-secondary">Cancel</a>
 </EditForm>
 
@@ -106,7 +104,6 @@
     private void CheckMembership()
     {
         if (string.IsNullOrEmpty(selectedPersonId)) { membershipStatus = null; return; }
-
         var personId = Guid.Parse(selectedPersonId);
         var membership = memberships
             .Where(m => m.MemberId == personId)
@@ -120,7 +117,7 @@
         }
         else if (membership.IsActive())
         {
-            membershipStatus = $"Active membership: {membership.MembershipType}, expires {membership.EndDate:dd.MM.yyyy} ({membership.DaysRemaining()} days left).";
+            membershipStatus = $"Active: {membership.MembershipType}, expires {membership.EndDate:dd.MM.yyyy} ({membership.DaysRemaining()} days left).";
             membershipOk = true;
         }
         else
@@ -133,7 +130,6 @@
     private void CheckCapacity()
     {
         if (string.IsNullOrEmpty(selectedRoomId)) { capacityStatus = null; return; }
-
         var room = rooms.FirstOrDefault(r => r.Id.ToString() == selectedRoomId);
         if (room is null) return;
 
@@ -143,20 +139,16 @@
             v.Notes.Contains($"|{room.Name}") &&
             v.VisitDate.Date == visitDate.Date);
 
-        if (todayVisits >= room.Capacity)
-        {
-            capacityStatus = $"Room '{room.Name}' is full today ({todayVisits}/{room.Capacity} visits).";
-            capacityOk = false;
-        }
-        else
-        {
-            capacityStatus = $" Room '{room.Name}' has space: {todayVisits}/{room.Capacity} today.";
-            capacityOk = true;
-        }
+        capacityOk = todayVisits < room.Capacity;
+        capacityStatus = capacityOk
+            ? $"Room '{room.Name}' has space: {todayVisits}/{room.Capacity} today."
+            : $"Room '{room.Name}' is full today ({todayVisits}/{room.Capacity}).";
     }
 
     private async Task CreateVisit()
     {
+        errorMessage = "";
+
         if (string.IsNullOrEmpty(selectedPersonId))
         {
             errorMessage = "Please select a person.";
@@ -164,19 +156,25 @@
         }
         if (!membershipOk)
         {
-            errorMessage = "Cannot create visit — person has no active membership.";
+            errorMessage = "Cannot log visit — person has no active membership.";
+            return;
+        }
+        // Evansi raamatust- tuleviku külastus pole lubatud
+        if (DateTime.TryParse(newDate, out var visitDt) && visitDt > DateTime.Now)
+        {
+            errorMessage = "Cannot log a visit in the future.";
             return;
         }
         if (!string.IsNullOrEmpty(selectedRoomId) && !capacityOk)
         {
-            errorMessage = "Cannot create visit — room is full.";
+            errorMessage = "Cannot log visit, room is full.";
             return;
         }
 
         var person = persons.FirstOrDefault(p => p.Id.ToString() == selectedPersonId);
         var room = rooms.FirstOrDefault(r => r.Id.ToString() == selectedRoomId);
 
-        visit.VisitDate = DateTime.Parse(newDate);
+        visit.VisitDate = visitDt;
         visit.Notes = $"{person?.Id}|{person?.FirstName} {person?.LastName}|{room?.Name ?? "—"}";
 
         await VisitsRepo.CreateAsync(visit);

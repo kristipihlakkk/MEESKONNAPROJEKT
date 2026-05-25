@@ -3,12 +3,11 @@
 @using Gym.Infra
 @inject IVisitsRepo VisitsRepo
 @inject IPersonsRepo PersonsRepo
-@inject IRoomsRepo RoomsRepo
 @inject NavigationManager Navigation
 
 <h3>Visits</h3>
 
-<a href="/visits/create" class="btn btn-primary mb-3">Create New</a>
+<a href="/visits/create" class="btn btn-primary mb-3">Log Visit</a>
 
 @if (visits is null)
 {
@@ -28,11 +27,13 @@ else
         <tbody>
             @foreach (var person in persons)
             {
-                var personVisits = visits.Where(v => v.Notes != null && v.Notes.StartsWith(person.Id.ToString())).ToList();
-                var last = personVisits.OrderByDescending(v => v.VisitDate).FirstOrDefault();
+                var pv = visits.Where(v =>
+                v.Notes != null &&
+                v.Notes.StartsWith(person.Id.ToString())).ToList();
+                var last = pv.OrderByDescending(v => v.VisitDate).FirstOrDefault();
                 <tr>
                     <td>@person.FirstName @person.LastName</td>
-                    <td><span class="badge bg-primary">@personVisits.Count</span></td>
+                    <td><span class="badge bg-primary">@pv.Count</span></td>
                     <td>@(last is null ? "—" : last.VisitDate.ToString("dd.MM.yyyy HH:mm"))</td>
                 </tr>
             }

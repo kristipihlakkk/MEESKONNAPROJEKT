@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="../Blazor/Tests/Infra/Tests.Infra.csproj" />
+  <Project Path="../Blazor/Tests/Logic/Tests.Logic.csproj" />
   <Project Path="Code/Aids/Aids.csproj" />
   <Project Path="Code/Data/Data.csproj" />
   <Project Path="Code/Infra/Infra.csproj" />
@@ -7,4 +9,6 @@
   <Project Path="Code/Shared/Shared.csproj" />
   <Project Path="GymSystem.Client/GymSystem.Client.csproj" />
   <Project Path="GymSystem/GymSystem.csproj" />
+  <Project Path="Tests/Aids/Tests.Aids.csproj" />
+  <Project Path="Tests/Data/Tests.Data.csproj" />
 </Solution>

@@ -21,7 +21,6 @@ builder.Services.AddScoped<ILocationRoomsRepo, LocationRoomsRepo>();
 builder.Services.AddScoped<IBookingsRepo, BookingsRepo>();
 builder.Services.AddScoped<IRoomBookingsRepo, RoomBookingsRepo>();
 builder.Services.AddScoped<IVisitsRepo, VisitsRepo>();
-builder.Services.AddScoped<IMembershipsRepo, MembershipsRepo>();
 builder.Services.AddScoped<ITrainersRepo, TrainersRepo>();
 
 var app = builder.Build();

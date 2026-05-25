@@ -4,7 +4,7 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">Gym Management System</a>
+        <a class="navbar-brand" href="">🏋️ Gym Management</a>
     </div>
 </div>
 
@@ -17,6 +17,7 @@
         <MyNavLink Href="trainers" IconClass="" Text="🏋️ Trainers" />
         <MyNavLink Href="memberships" IconClass="" Text="💳 Memberships" />
         <MyNavLink Href="locations" IconClass="" Text="📍 Locations" />
+        <MyNavLink Href="addresses" IconClass="" Text="🗺️ Addresses" />
         <MyNavLink Href="rooms" IconClass="" Text="🚪 Gym Rooms" />
         <MyNavLink Href="bookings" IconClass="" Text="📅 Bookings" />
         <MyNavLink Href="visits" IconClass="" Text="✅ Visits" />
@@ -24,7 +25,7 @@
 </div>
 
 @code {
-    private string currentUrl;
+    private string currentUrl = "";
 
     protected override void OnInitialized()
     {

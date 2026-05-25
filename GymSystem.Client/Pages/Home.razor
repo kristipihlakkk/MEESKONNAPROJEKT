@@ -1,7 +1,49 @@
 ﻿@page "/"
+<PageTitle>Gym Management System</PageTitle>
 
-<PageTitle>Home</PageTitle>
+@inject NavigationManager NavigationManager
 
-<h1>Hello, world!</h1>
+<div style="margin: 40px;">
 
-Welcome to your new app.
+    <h1>Gym Management System</h1>
+    <p>Manage gym members, bookings and visits.</p>
+    <hr />
+
+    <table>
+        <tr>
+            <td style="padding: 10px;">
+                <h3>Persons</h3>
+                <p>Manage gym members and staff.</p>
+                <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/persons")'>Open</button>
+            </td>
+            <td style="padding: 10px;">
+                <h3>Memberships</h3>
+                <p>Manage memberships.</p>
+                <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/memberships")'>Open</button>
+            </td>
+            <td style="padding: 10px;">
+                <h3>Visits</h3>
+                <p>Log visits.</p>
+                <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/visits")'>Open</button>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 10px;">
+                <h3>Bookings</h3>
+                <p>Book rooms.</p>
+                <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/bookings")'>Open</button>
+            </td>
+            <td style="padding: 10px;">
+                <h3>Gym Rooms</h3>
+                <p>Manage rooms and capacities.</p>
+                <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/rooms")'>Open</button>
+            </td>
+            <td style="padding: 10px;">
+                <h3>Trainers</h3>
+                <p>Manage trainers.</p>
+                <button class="btn btn-primary" @onclick='() => NavigationManager.NavigateTo("/trainers")'>Open</button>
+            </td>
+        </tr>
+    </table>
+
+</div>
