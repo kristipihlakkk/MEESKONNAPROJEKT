@@ -98,7 +98,6 @@
 
         await BookingsRepo.UpdateAsync(booking);
 
-        // ensure room booking points to selected room
         var existingRb = booking.RoomBookings?.FirstOrDefault();
         if (!string.IsNullOrWhiteSpace(selectedRoomIdString) && Guid.TryParse(selectedRoomIdString, out var rid))
         {

@@ -21,8 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var a in addresses)
-        {
+        @foreach (var a in addresses) {
             <tr>
                 <td>@a.AddressLine1</td>
                 <td>@a.AddressLine2</td>
@@ -41,8 +40,7 @@
 @code {
     private List<Address> addresses = new();
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         addresses = (await AddressesRepo.GetAsync(new Query())).ToList();
     }
 }

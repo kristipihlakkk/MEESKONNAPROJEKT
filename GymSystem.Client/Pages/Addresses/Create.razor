@@ -39,8 +39,7 @@
 @code {
     private Address address = new();
 
-    private async Task CreateAddress()
-    {
+    private async Task CreateAddress() {
         await AddressesRepo.CreateAsync(address);
         Navigation.NavigateTo("/addresses");
     }

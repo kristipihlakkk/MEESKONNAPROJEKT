@@ -4,8 +4,7 @@ using System.Collections.Generic;
 
 namespace Gym.Data;
 
-public class Room : NamedEntity
-{
+public class Room : NamedEntity {
     public int Capacity { get; set; }
     public RoomType Type { get; set; }
     public string Description { get; set; } = "";

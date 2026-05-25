@@ -23,6 +23,7 @@ public class EfBaseRepo<TContext, TEntity> (TContext c): IRepo<TEntity>
     public async Task<TEntity> GetAsync(Guid id) =>
         await Query().FirstOrDefaultAsync(x => x.Id == id);
     public async Task<IEnumerable<TEntity>> GetAsync(Query q) => await getAsync(q);
+
     public async Task<TEntity> UpdateAsync(TEntity e) {
         db.Update(e);
         await db.SaveChangesAsync();

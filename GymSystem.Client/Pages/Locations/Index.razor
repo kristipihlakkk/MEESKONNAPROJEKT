@@ -17,35 +17,20 @@
             <th>City</th>
             <th>Country</th>
             <th>Open</th>
-            <th>Rooms</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var location in locations)
-        {
+        @foreach (var location in locations) {
             <tr>
                 <td>@location.Address?.AddressLine1</td>
                 <td>@location.Address?.City</td>
                 <td>@location.Address?.Country</td>
-                <td>@location.OpeningHours.ToString("HH:mm") - @location.ClosingHours.ToString("HH:mm")</td>
-                <td>
-                    @if (location.Rooms != null && location.Rooms.Any(r => r != null))
-                    {
-                        @foreach (var r in location.Rooms.Where(r => r != null))
-                        {
-                            <span class="badge bg-secondary me-1">@r.Name</span>
-                        }
-                    }
-                    else
-                    {
-                        <span class="text-muted">—</span>
-                    }
-                </td>
+                <td>@location.OpeningHours.ToString("HH:mm") - @location.ClosingHours.ToString("HH:mm")</td>                
                 <td>
                     <a href="/locations/edit/@location.Id" class="btn btn-sm btn-primary">Edit</a>
+                    <a href="/locations/rooms/@location.Id" class="btn btn-sm btn-secondary">Manage Rooms</a>
                     <a href="/locations/delete/@location.Id" class="btn btn-sm btn-danger">Delete</a>
-                    <a href="/locationrooms/create/@location.Id" class="btn btn-sm btn-secondary ms-1">Manage Rooms</a>
                 </td>
             </tr>
         }
@@ -55,8 +40,7 @@
 @code {
     private List<Location> locations = new();
 
-    protected override async Task OnInitializedAsync()
-    {
+    protected override async Task OnInitializedAsync() {
         locations = (await LocationsRepo.GetAsync(new Query())).ToList();
     }
 }

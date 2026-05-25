@@ -3,7 +3,6 @@
 namespace Gym.Data;
 
 public class Booking : BaseEntity {
-    // allow nullable navigations; Booking may have multiple RoomBookings
     public Guid Id { get; set; }
     public string BookingTitle { get; set; } = "";
     public Person? BookedBy { get; set; }

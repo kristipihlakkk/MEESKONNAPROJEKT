@@ -1,0 +1,96 @@
+@page "/locations/rooms/{Id:guid}"
+@using Gym.Data
+@using Gym.Infra
+@using Gym.Data.Locations
+@inject ILocationsRepo LocationsRepo
+@inject IRoomsRepo RoomsRepo
+@inject ILocationRoomsRepo LocationRoomsRepo
+@inject NavigationManager Navigation
+
+<h3>Manage Rooms for Location</h3>
+
+@if (location == null) {
+    <div class="text-muted">Loading...</div>
+} else {
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">@location.Address?.AddressLine1</h5>
+            <h6 class="card-subtitle mb-2 text-muted">@location.Address?.City, @location.Address?.Country</h6>
+            <p class="card-text">Open: @location.OpeningHours.ToString("HH:mm") - @location.ClosingHours.ToString("HH:mm")</p>
+            @if (!string.IsNullOrWhiteSpace(location.AdditionalInfo)) {
+                <p class="card-text"><small class="text-muted">@location.AdditionalInfo</small></p>
+            }
+        </div>
+    </div>
+
+    <EditForm Model="location" OnValidSubmit="SaveRooms">
+        <DataAnnotationsValidator />
+
+        <div class="mb-3">
+            <label>Rooms (select one or many)</label>
+            @if (rooms != null && rooms.Any()) {
+                <div>
+                    @foreach (var r in rooms) {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="lr_@r.Id" checked="@selectedRoomIds.Contains(r.Id)" @onchange="@(_ => ToggleRoom(r.Id))" />
+                            <label class="form-check-label" for="lr_@r.Id">@r.Name (@r.Type)</label>
+                        </div>
+                    }
+                </div>
+            } else {
+                <div class="text-muted">No rooms available.</div>
+            }
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="/locations" class="btn btn-secondary ms-2">Back</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private Location? location;
+    private List<Room> rooms = new();
+    private List<Guid> selectedRoomIds = new();
+
+    protected override async Task OnInitializedAsync() {
+        location = await LocationsRepo.GetAsync(Id);
+        if (location == null) {
+            Navigation.NavigateTo("/locations");
+            return;
+        }
+
+        rooms = (await RoomsRepo.GetAsync(new Query())).ToList();
+
+        if (location.LocationRooms != null) {
+            foreach (var lr in location.LocationRooms) {
+                if (lr.RoomId != null && !selectedRoomIds.Contains(lr.RoomId.Value)) selectedRoomIds.Add(lr.RoomId.Value);
+            }
+        }
+    }
+
+    private async Task SaveRooms() {
+        var loc = await LocationsRepo.GetAsync(Id);
+        var existingRoomIds = new List<Guid>(loc?.LocationRooms?.Where(x => x.RoomId != null).Select(x => x.RoomId!.Value) ?? Enumerable.Empty<Guid>());
+
+        foreach (var rid in selectedRoomIds) {
+            if (existingRoomIds.Contains(rid)) continue;
+            var newLr = new Gym.Data.LocationRooms { LocationId = Id, RoomId = rid };
+            await LocationRoomsRepo.CreateAsync(newLr);
+        }
+
+        if (loc?.LocationRooms != null) {
+            var toRemove = loc.LocationRooms.Where(lr => lr.RoomId != null && !selectedRoomIds.Contains(lr.RoomId.Value)).ToList();
+            foreach (var rem in toRemove) {
+                await LocationRoomsRepo.DeleteAsync(rem.Id);
+            }
+        }
+
+        Navigation.NavigateTo("/locations");
+    }
+
+    private void ToggleRoom(Guid id) {
+        if (selectedRoomIds.Contains(id)) selectedRoomIds.Remove(id);
+        else selectedRoomIds.Add(id);
+    }
+}

@@ -13,8 +13,8 @@
     <ValidationSummary />
 
     <div class="mb-3">
-        <label>Address</label>
-        <select class="form-control" @bind="selectedAddressIdString">
+        <label>Address</label>        
+        <select class="form-control" size="10" style="overflow:auto;" @bind="selectedAddressIdString">
             <option value="">-- Select address --</option>
             @foreach (var a in addresses) {
                 <option value="@a.Id">@a.AddressLine1, @a.City (@a.Country)</option>
@@ -50,16 +50,15 @@
     private string closingHoursString = "22:00";
 
     protected override async Task OnInitializedAsync() {
-        addresses = (await AddressesRepo.GetAsync(new Query())).ToList();
+        var queryDict = new Dictionary<string, string> { { "Page", "1" }, { "PageSize", "1000" } };
+        addresses = (await AddressesRepo.GetAsync(new Query(queryDict))).ToList();
     }
-
+    
     private async Task CreateLocation() {
         if (!string.IsNullOrEmpty(selectedAddressIdString) && Guid.TryParse(selectedAddressIdString, out var aid)) {
             var a = await AddressesRepo.GetAsync(aid);
             if (a != null) location.Address = a;
-
         }
-
         try {
             if (!string.IsNullOrWhiteSpace(openingHoursString)) location.OpeningHours = TimeOnly.Parse(openingHoursString);
             if (!string.IsNullOrWhiteSpace(closingHoursString)) location.ClosingHours = TimeOnly.Parse(closingHoursString);

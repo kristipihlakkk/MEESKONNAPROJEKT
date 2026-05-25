@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Gym.Infra;
 
-public sealed class PersonsRepo : BaseRepo<Person>, IPersonsRepo
-{
+public sealed class PersonsRepo : BaseRepo<Person>, IPersonsRepo {
     public PersonsRepo(AppDbContext context) : base(context) { }
 
     public override async Task<Person?> GetAsync(Guid id)
@@ -21,8 +20,7 @@ public sealed class PersonsRepo : BaseRepo<Person>, IPersonsRepo
             .ToListAsync();
 }
 
-public sealed class LocationsRepo : BaseRepo<Location>, ILocationsRepo
-{
+public sealed class LocationsRepo : BaseRepo<Location>, ILocationsRepo {
     public LocationsRepo(AppDbContext context) : base(context) { }
 
     public override async Task<Location?> GetAsync(Guid id)
@@ -49,8 +47,7 @@ public class LocationRoomsRepo(AppDbContext c = null)
     : EfBaseRepo<AppDbContext, LocationRooms>(c), ILocationRoomsRepo { }
 
 
-public sealed class BookingsRepo : BaseRepo<Booking>, IBookingsRepo
-{
+public sealed class BookingsRepo : BaseRepo<Booking>, IBookingsRepo {
     public BookingsRepo(AppDbContext context) : base(context) { }
 
     public override async Task<Booking?> GetAsync(Guid id)
@@ -59,11 +56,11 @@ public sealed class BookingsRepo : BaseRepo<Booking>, IBookingsRepo
             .Include(b => b.RoomBookings)!.ThenInclude(rb => rb.Room)
             .FirstOrDefaultAsync(b => b.Id == id);
 
-        public override async Task<IEnumerable<Booking>> GetAsync(Query query)
-            => await _context.Set<Booking>()
-                .Include(b => b.BookedBy)
-                .Include(b => b.RoomBookings)!.ThenInclude(rb => rb.Room)
-                .ToListAsync();
+    public override async Task<IEnumerable<Booking>> GetAsync(Query query)
+        => await _context.Set<Booking>()
+            .Include(b => b.BookedBy)
+            .Include(b => b.RoomBookings)!.ThenInclude(rb => rb.Room)
+            .ToListAsync();
 }
 
 public class RoomBookingsRepo(AppDbContext c = null)
@@ -77,8 +74,7 @@ public sealed class VisitsRepo : BaseRepo<Visit>, IVisitsRepo {
 }
 
 
-public sealed class TrainersRepo : BaseRepo<Trainer>, ITrainersRepo
-{
+public sealed class TrainersRepo : BaseRepo<Trainer>, ITrainersRepo {
     public TrainersRepo(AppDbContext context) : base(context) { }
 
     public override async Task<Trainer?> GetAsync(Guid id)
