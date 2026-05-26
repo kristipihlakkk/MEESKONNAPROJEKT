@@ -1,0 +1,96 @@
+@page "/memberships/create"
+@using Gym.Data.Membership
+@using Gym.Infra
+@inject IMembershipsRepo MembershipsRepo
+@inject IPersonsRepo PersonsRepo
+@inject NavigationManager Navigation
+
+<h3>Create Membership</h3>
+
+<EditForm Model="@membership" OnValidSubmit="CreateMembership">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div class="mb-3">
+		<label>Member</label>
+		<select class="form-control" @bind="selectedPersonIdString">
+			<option value="">-- Select person --</option>
+			@foreach (var p in persons)
+			{
+				<option value="@p.Id">@p.FirstName @p.LastName</option>
+			}
+		</select>
+	</div>
+
+	<div class="mb-3">
+		<label>Membership Type</label>
+		<select class="form-control" @onchange="OnTypeChanged">
+			<option value="">-- Select type --</option>
+			@foreach (var t in membershipTypes)
+			{
+				<option value="@t.Name">@t.Name (@t.Price.ToString("C"))</option>
+			}
+		</select>
+	</div>
+
+	<div class="mb-3">
+		<label>Start</label>
+		<InputText class="form-control" type="datetime-local" @bind-Value="startString" />
+	</div>
+	<div class="mb-3">
+		<label>End</label>
+		<InputText class="form-control" type="datetime-local" @bind-Value="endString" />
+	</div>
+
+	<button type="submit" class="btn btn-success">Create</button>
+	<a href="/memberships" class="btn btn-secondary ms-2">Cancel</a>
+</EditForm>
+
+@code {
+	private Membership membership = new();
+	private List<Gym.Data.Person> persons = new();
+	private List<MembershipType> membershipTypes = new()
+	{
+		new MembershipType { Name = "Monthly", DurationDays = 30, Price = 29.99M },
+		new MembershipType { Name = "Annual", DurationDays = 365, Price = 299.99M },
+		new MembershipType { Name = "10-Visit Pass", DurationDays = 365, Price = 49.99M }
+	};
+
+	private string selectedPersonIdString = string.Empty;
+	private string selectedTypeName = string.Empty;
+	private string startString = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+	private string endString = DateTime.Now.AddDays(30).ToString("yyyy-MM-ddTHH:mm");
+
+	protected override async Task OnInitializedAsync()
+	{
+		persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+	}
+
+	private void OnTypeChanged(ChangeEventArgs e)
+	{
+		selectedTypeName = e?.Value?.ToString() ?? string.Empty;
+		var type = membershipTypes.FirstOrDefault(t => t.Name == selectedTypeName);
+		if (type != null)
+		{
+			if (DateTime.TryParse(startString, out var s))
+			{
+				endString = s.AddDays(type.DurationDays).ToString("yyyy-MM-ddTHH:mm");
+			}
+		}
+	}
+
+	private async Task CreateMembership()
+	{
+		if (string.IsNullOrWhiteSpace(selectedPersonIdString) || !Guid.TryParse(selectedPersonIdString, out var pid)) return;
+		membership.MemberId = pid;
+		membership.MembershipType = selectedTypeName;
+		if (DateTime.TryParse(startString, out var s)) membership.StartDate = s;
+		if (DateTime.TryParse(endString, out var e)) membership.EndDate = e;
+		var type = membershipTypes.FirstOrDefault(t => t.Name == selectedTypeName);
+		if (type != null) membership.PricePaid = type.Price;
+		membership.Status = MembershipStatus.Active;
+
+		await MembershipsRepo.CreateAsync(membership);
+		Navigation.NavigateTo("/memberships");
+	}
+}

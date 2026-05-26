@@ -1,0 +1,230 @@
+@page "/memberships"
+@using Gym.Data.Membership
+@using Gym.Infra
+@using System.Timers
+@implements IDisposable
+@inject IPersonsRepo PersonsRepo
+@inject IMembershipsRepo MembershipsRepo
+
+<h1>Memberships</h1>
+
+<div class="mb-3">
+	<label>Select Member</label>
+	<select class="form-control" value="@selectedPersonId" @onchange="OnPersonChanged">
+		<option value="">� select person �</option>
+		@foreach (var p in persons)
+		{
+			<option value="@p.Id">@p.FirstName @p.LastName</option>
+		}
+	</select>
+</div>
+
+@if (!string.IsNullOrEmpty(selectedPersonId))
+{
+	<div class="row">
+		@foreach (var t in membershipTypes)
+		{
+			<div class="col-md-4 mb-3">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">@t.Name</h5>
+						<p class="card-text">Duration: @t.DurationDays days</p>
+						<p class="card-text">Price: @t.Price.ToString("C")</p>
+						@if (IsCurrentMembershipActive())
+						{
+							<button class="btn btn-primary" disabled>Buy</button>
+						}
+						else
+						{
+							<button class="btn btn-primary" @onclick="() => Buy(t)">Buy</button>
+						}
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+
+	@if (!string.IsNullOrEmpty(statusMessage))
+	{
+		<div class="alert alert-info mt-3">@statusMessage</div>
+	}
+
+	@if (currentMembership is not null)
+	{
+		var owner = persons.FirstOrDefault(p => p.Id == currentMembership.MemberId);
+		<h2 class="mt-4">Membership for @owner?.FirstName @owner?.LastName</h2>
+		<div class="card mb-3">
+			<div class="card-body">
+				<h5 class="card-title">@currentMembership.MembershipType</h5>
+				<p class="card-text">Status: @DisplayStatus()</p>
+				<p class="card-text">Start: @currentMembership.StartDate.ToString("g")</p>
+				<p class="card-text">End: @currentMembership.EndDate.ToString("g")</p>
+				<p class="card-text">Days remaining: @DaysRemaining()</p>
+				<p class="card-text">Price paid: @currentMembership.PricePaid.ToString("C")</p>
+
+				<div class="btn-group">
+					@if (IsExpired())
+					{
+						<button class="btn btn-success" disabled>Renew</button>
+					}
+					else
+					{
+						<button class="btn btn-success" @onclick="Renew">Renew</button>
+					}
+					@if (IsExpired() || IsCancelled())
+					{
+						<button class="btn btn-danger" disabled>Cancel</button>
+					}
+					else
+					{
+						<button class="btn btn-danger" @onclick="Cancel">Cancel</button>
+					}
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<p class="text-muted mt-3">This person has no membership yet. Buy one above.</p>
+	}
+}
+
+@code {
+	private List<Gym.Data.Person> persons = new();
+	private List<MembershipType> membershipTypes = new()
+	{
+		new MembershipType { Name = "Monthly", DurationDays = 30, Price = 29.99M },
+		new MembershipType { Name = "Annual", DurationDays = 365, Price = 299.99M },
+		new MembershipType { Name = "10-Visit Pass", DurationDays = 365, Price = 49.99M }
+	};
+
+	private string selectedPersonId = "";
+	private string statusMessage = string.Empty;
+	private Membership? currentMembership;
+	private Timer? refreshTimer;
+
+	protected override async Task OnInitializedAsync()
+	{
+		persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+
+		refreshTimer = new Timer(1000 * 60);
+		refreshTimer.Elapsed += async (_, __) => await InvokeAsync(() =>
+		{
+			CheckExpiration();
+			StateHasChanged();
+		});
+		refreshTimer.AutoReset = true;
+		refreshTimer.Start();
+	}
+
+	private async void OnPersonChanged(ChangeEventArgs e)
+	{
+		selectedPersonId = e.Value?.ToString() ?? "";
+		statusMessage = string.Empty;
+		currentMembership = null;
+
+		if (!string.IsNullOrEmpty(selectedPersonId))
+		{
+			var personId = Guid.Parse(selectedPersonId);
+			var all = await MembershipsRepo.GetAsync(new Query());
+			currentMembership = all
+				.Where(m => m.MemberId == personId)
+				.OrderByDescending(m => m.EndDate)
+				.FirstOrDefault();
+		}
+	}
+
+	private async void Buy(MembershipType type)
+	{
+		if (IsCurrentMembershipActive())
+		{
+			statusMessage = "You already have an active membership. You cannot buy another until it expires.";
+			return;
+		}
+
+		var now = DateTime.Now;
+		currentMembership = new Membership
+		{
+			MemberId = Guid.Parse(selectedPersonId),
+			MembershipType = type.Name,
+			StartDate = now,
+			EndDate = now.AddDays(type.DurationDays),
+			PricePaid = type.Price,
+			Status = MembershipStatus.Active
+		};
+
+		await MembershipsRepo.CreateAsync(currentMembership);
+		statusMessage = $"'{type.Name}' bought for {type.Price:C}.";
+	}
+
+	private async void Renew()
+	{
+		if (currentMembership is null) { statusMessage = "No membership to renew."; return; }
+
+		var type = membershipTypes.FirstOrDefault(t => t.Name == currentMembership.MembershipType);
+		if (type is null) { statusMessage = "Membership type not found."; return; }
+
+		currentMembership.EndDate = currentMembership.EndDate.AddDays(type.DurationDays);
+		currentMembership.PricePaid += type.Price;
+		currentMembership.Status = MembershipStatus.Active;
+
+		await MembershipsRepo.UpdateAsync(currentMembership);
+		statusMessage = $"Renewed until {currentMembership.EndDate:g}.";
+	}
+
+	private async void Cancel()
+	{
+		if (currentMembership is null) { statusMessage = "No membership to cancel."; return; }
+
+		currentMembership.Status = MembershipStatus.Cancelled;
+		await MembershipsRepo.UpdateAsync(currentMembership);
+		statusMessage = $"Cancelled. Active until {currentMembership.EndDate:g}.";
+	}
+
+	private int DaysRemaining()
+	{
+		if (currentMembership is null) return 0;
+		var remaining = (currentMembership.EndDate - DateTime.Now).Days;
+		return remaining > 0 ? remaining : 0;
+	}
+
+	private bool IsCurrentMembershipActive()
+	{
+		if (currentMembership is null) return false;
+		var now = DateTime.Now;
+		var activeStatuses = new[] { MembershipStatus.Active, MembershipStatus.Cancelled };
+		return activeStatuses.Contains(currentMembership.Status) && now >= currentMembership.StartDate && now <= currentMembership.EndDate;
+	}
+
+	private bool IsExpired()
+	{
+		if (currentMembership is null) return true;
+		return DateTime.Now > currentMembership.EndDate;
+	}
+
+	private bool IsCancelled() =>
+		currentMembership?.Status == MembershipStatus.Cancelled;
+
+	private string DisplayStatus()
+	{
+		if (currentMembership is null) return "None";
+		if (IsExpired()) { currentMembership.Status = MembershipStatus.Expired; return "Expired"; }
+		return currentMembership.Status.ToString();
+	}
+
+	private void CheckExpiration()
+	{
+		if (currentMembership is null) return;
+		if (DateTime.Now > currentMembership.EndDate && currentMembership.Status != MembershipStatus.Expired)
+		{
+			currentMembership.Status = MembershipStatus.Expired;
+			statusMessage = $"Membership '{currentMembership.MembershipType}' has expired.";
+		}
+	}
+
+	public void Dispose()
+	{
+		refreshTimer?.Stop();
+		refreshTimer?.Dispose();
+	}
+}

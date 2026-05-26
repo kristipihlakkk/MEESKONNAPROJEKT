@@ -1,0 +1,93 @@
+@page "/memberships/edit/{id:guid}"
+@using Gym.Data.Membership
+@using Gym.Infra
+@inject IMembershipsRepo MembershipsRepo
+@inject IPersonsRepo PersonsRepo
+@inject NavigationManager Navigation
+
+<h3>Edit Membership</h3>
+
+<EditForm Model="@membership" OnValidSubmit="UpdateMembership">
+	<DataAnnotationsValidator />
+	<ValidationSummary />
+
+	<div class="mb-3">
+		<label>Member</label>
+		<select class="form-control" @bind="selectedPersonIdString">
+			<option value="">-- Select person --</option>
+			@foreach (var p in persons)
+			{
+				<option value="@p.Id">@p.FirstName @p.LastName</option>
+			}
+		</select>
+	</div>
+
+	<div class="mb-3">
+		<label>Membership Type</label>
+		<InputText class="form-control" @bind-Value="membership.MembershipType" />
+	</div>
+
+	<div class="mb-3">
+		<label>Start</label>
+		<InputText class="form-control" type="datetime-local" @bind-Value="startString" />
+	</div>
+	<div class="mb-3">
+		<label>End</label>
+		<InputText class="form-control" type="datetime-local" @bind-Value="endString" />
+	</div>
+
+	<div class="mb-3">
+		<label>Price Paid</label>
+		<InputNumber class="form-control" @bind-Value="membership.PricePaid" />
+	</div>
+
+	<div class="mb-3">
+		<label>Status</label>
+		<select class="form-control" @bind="membership.Status">
+			@foreach (var s in Enum.GetValues<MembershipStatus>())
+			{
+				<option value="@s">@s</option>
+			}
+		</select>
+	</div>
+
+	<button type="submit" class="btn btn-primary">Save</button>
+	<a href="/memberships" class="btn btn-secondary ms-2">Cancel</a>
+</EditForm>
+
+@code {
+	[Parameter] public Guid Id { get; set; }
+	private Membership membership = new();
+	private List<Gym.Data.Person> persons = new();
+	private string selectedPersonIdString = string.Empty;
+	private string startString = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+	private string endString = DateTime.Now.AddDays(30).ToString("yyyy-MM-ddTHH:mm");
+
+	protected override async Task OnInitializedAsync()
+	{
+		persons = (await PersonsRepo.GetAsync(new Query())).ToList();
+		membership = await MembershipsRepo.GetAsync(Id);
+		if (membership == null) Navigation.NavigateTo("/memberships");
+		else
+		{
+			try {
+				selectedPersonIdString = membership.MemberId.ToString();
+				startString = membership.StartDate.ToString("yyyy-MM-ddTHH:mm");
+				endString = membership.EndDate.ToString("yyyy-MM-ddTHH:mm");
+			} catch { }
+		}
+	}
+
+	private async Task UpdateMembership()
+	{
+		if (!string.IsNullOrWhiteSpace(selectedPersonIdString) && Guid.TryParse(selectedPersonIdString, out var pid))
+		{
+			membership.MemberId = pid;
+		}
+		if (DateTime.TryParse(startString, out var s)) membership.StartDate = s;
+		if (DateTime.TryParse(endString, out var e)) membership.EndDate = e;
+
+		await MembershipsRepo.UpdateAsync(membership);
+		Navigation.NavigateTo("/memberships");
+	}
+}
